@@ -271,3 +271,35 @@ export interface Contrato {
   tipo_execucao: 'escopo' | 'por_hh' | 'hibrido';
   status: 'ativo' | 'concluido' | 'cancelado';
 }
+
+// Cronograma e Projetos
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  type: 'obra-civil' | 'manutencao' | 'instalacao' | 'reforma' | 'consultoria';
+  status: 'planejado' | 'em-andamento' | 'atrasado' | 'concluido';
+  startDate: string;
+  endDate: string;
+  duration: number;
+  progress: number;
+  priority: 'baixa' | 'media' | 'alta' | 'urgente';
+  client: string;
+  responsible: string;
+  budget: number;
+}
+
+export interface Activity {
+  id: string;
+  projectId: string;
+  name: string;
+  description: string;
+  status: 'planejado' | 'em-andamento' | 'atrasado' | 'concluido';
+  startDate: string;
+  endDate: string;
+  duration: number;
+  progress: number;
+  assignedTeam: string;
+  dependencies: string[];
+  critical: boolean;
+}

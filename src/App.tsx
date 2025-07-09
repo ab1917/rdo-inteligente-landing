@@ -14,6 +14,7 @@ import { RDOList, CreateRDO } from "./pages/rdo";
 import { BudgetList } from "./pages/budgets";
 import { EquipeList, FuncionarioList, EquipamentoList } from "./pages/equipes";
 import { CRMDashboard, LeadsList, OportunidadesList, ClientesList } from "./pages/crm";
+import { CronogramaList } from "./pages/cronograma";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -115,6 +116,14 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <ClientesList />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/cronograma" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <CronogramaList />
                 </AppLayout>
               </ProtectedRoute>
             } />
