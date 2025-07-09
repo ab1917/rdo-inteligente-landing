@@ -105,6 +105,13 @@ export const funcionariosData: Funcionario[] = [
     salario: 3500,
     especialidades: ['Alvenaria', 'Reboco', 'Estrutural'],
     valor_hora: 35,
+    jornada_normal_dia: 8,
+    limite_he_semanal: 10,
+    horario_noturno_inicio: "22:00",
+    horario_noturno_fim: "05:00",
+    percentual_he_60: 1.6,
+    percentual_he_100: 2.0,
+    adicional_noturno: 0.25,
     certificacoes: [
       {
         id: '1',
@@ -133,6 +140,13 @@ export const funcionariosData: Funcionario[] = [
     salario: 4200,
     especialidades: ['Elétrica Predial', 'Elétrica Industrial', 'NR-10'],
     valor_hora: 55,
+    jornada_normal_dia: 8,
+    limite_he_semanal: 12,
+    horario_noturno_inicio: "22:00",
+    horario_noturno_fim: "05:00",
+    percentual_he_60: 1.6,
+    percentual_he_100: 2.0,
+    adicional_noturno: 0.25,
     certificacoes: [
       {
         id: '2',
@@ -174,6 +188,13 @@ export const funcionariosData: Funcionario[] = [
     salario: 4800,
     especialidades: ['Solda Elétrica', 'Solda TIG', 'Solda MIG'],
     valor_hora: 60,
+    jornada_normal_dia: 8,
+    limite_he_semanal: 10,
+    horario_noturno_inicio: "22:00",
+    horario_noturno_fim: "05:00",
+    percentual_he_60: 1.6,
+    percentual_he_100: 2.0,
+    adicional_noturno: 0.25,
     certificacoes: [
       {
         id: '4',
@@ -202,6 +223,13 @@ export const funcionariosData: Funcionario[] = [
     salario: 5200,
     especialidades: ['Manutenção Mecânica', 'Instrumentação', 'NR-12'],
     valor_hora: 65,
+    jornada_normal_dia: 8,
+    limite_he_semanal: 8,
+    horario_noturno_inicio: "22:00",
+    horario_noturno_fim: "05:00",
+    percentual_he_60: 1.6,
+    percentual_he_100: 2.0,
+    adicional_noturno: 0.25,
     certificacoes: [
       {
         id: '5',
@@ -230,7 +258,14 @@ export const funcionariosData: Funcionario[] = [
     dataAdmissao: '2023-08-15',
     salario: 3800,
     especialidades: ['Hidráulica', 'Esgoto', 'Água Quente'],
-    valor_hora: 42
+    valor_hora: 42,
+    jornada_normal_dia: 8,
+    limite_he_semanal: 10,
+    horario_noturno_inicio: "22:00",
+    horario_noturno_fim: "05:00",
+    percentual_he_60: 1.6,
+    percentual_he_100: 2.0,
+    adicional_noturno: 0.25
   },
   {
     id: '6',
@@ -244,6 +279,13 @@ export const funcionariosData: Funcionario[] = [
     salario: 8500,
     especialidades: ['Segurança do Trabalho', 'CIPA', 'Auditorias'],
     valor_hora: 95,
+    jornada_normal_dia: 8,
+    limite_he_semanal: 12,
+    horario_noturno_inicio: "22:00",
+    horario_noturno_fim: "05:00",
+    percentual_he_60: 1.6,
+    percentual_he_100: 2.0,
+    adicional_noturno: 0.25,
     certificacoes: [
       {
         id: '6',

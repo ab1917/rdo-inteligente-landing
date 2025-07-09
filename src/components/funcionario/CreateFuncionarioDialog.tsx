@@ -36,6 +36,13 @@ export function CreateFuncionarioDialog({ open, onOpenChange }: CreateFuncionari
       especialidades: data.especialidades,
       certificacoes: [],
       valor_hora: data.valor_hora,
+      jornada_normal_dia: 8,
+      limite_he_semanal: 10,
+      horario_noturno_inicio: "22:00",
+      horario_noturno_fim: "05:00",
+      percentual_he_60: 1.6,
+      percentual_he_100: 2.0,
+      adicional_noturno: 0.25,
     };
 
     // Adicionar ao mock (em uma aplicação real, seria uma chamada à API)

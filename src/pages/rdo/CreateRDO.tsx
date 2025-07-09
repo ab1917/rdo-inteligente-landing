@@ -29,6 +29,8 @@ import { mockObras, mockFuncionarios } from '@/services/mockData';
 import { RDO, Equipamento, Ocorrencia } from '@/types';
 import { PhotoUpload } from '@/components/rdo/PhotoUpload';
 import { RDOValidations } from '@/components/rdo/RDOValidations';
+import { BoletimMedicaoCompleto } from '@/components/boletim/BoletimMedicaoCompleto';
+import { useBoletimMedicao } from '@/hooks/useBoletimMedicao';
 import { StatusBadge } from '@/components/rdo/StatusBadge';
 
 const rdoSchema = z.object({
@@ -77,9 +79,12 @@ const climaOptions = [
 export function CreateRDO() {
   const navigate = useNavigate();
   const { createRDO, loading } = useRDO();
+  const { gerarBoletimDeRDO, aprovarBoletim, loading: loadingBoletim } = useBoletimMedicao();
   const { toast } = useToast();
   const [photos, setPhotos] = useState<File[]>([]);
   const [rdoStatus, setRdoStatus] = useState<RDO['status']>('rascunho');
+  const [boletimGerado, setBoletimGerado] = useState(null);
+  const [activeTab, setActiveTab] = useState('basico');
 
   const form = useForm<RDOFormData>({
     resolver: zodResolver(rdoSchema),
@@ -135,6 +140,81 @@ export function CreateRDO() {
     const fimMinutos = horaFim * 60 + minutoFim;
     
     return Math.max(0, (fimMinutos - inicioMinutos) / 60);
+  };
+
+  const handleGerarBoletim = async () => {
+    const formData = form.getValues();
+    if (!formData.equipes.length) {
+      toast({
+        title: "Erro",
+        description: "Adicione pelo menos um funcionário para gerar o boletim.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const rdoTemp = {
+        id: 'temp-' + Date.now(),
+        tipo: 'obra_civil' as const,
+        obra: formData.obra,
+        cliente: mockObras.find(o => o.nome === formData.obra)?.cliente || 'Cliente',
+        local: mockObras.find(o => o.nome === formData.obra)?.endereco || 'Local',
+        data: formData.data,
+        responsavel: formData.responsavel,
+        clima: formData.clima,
+        temperatura: formData.temperatura,
+        status: 'rascunho' as const,
+        hh_executado_total: 0,
+        hh_previsto_dia: 8,
+        desvio_produtividade: 0,
+        custo_hh_realizado: 0,
+        validacao_tecnica: {
+          funcionario_certificado: true,
+          equipamento_calibrado: true,
+          conformidade_nr: [],
+          alertas: []
+        },
+        atividades: [],
+        equipes: formData.equipes.map((eq, i) => ({
+          id: (i + 1).toString(),
+          funcionario: eq.funcionario,
+          cargo: mockFuncionarios.find(f => f.nome === eq.funcionario)?.cargo || '',
+          horaInicio: eq.horaInicio,
+          horaFim: eq.horaFim,
+          horasTrabalhadas: calcularHoras(eq.horaInicio, eq.horaFim)
+        })),
+        fotos: [],
+        equipamentos: formData.equipamentos?.map((eq, i) => ({
+          id: (i + 1).toString(),
+          nome: eq.nome,
+          tipo: eq.tipo,
+          categoria: 'obra_civil' as const,
+          horaInicio: eq.horaInicio,
+          horaFim: eq.horaFim,
+          horasUsadas: calcularHoras(eq.horaInicio, eq.horaFim),
+          status: 'em_uso' as const
+        })) || [],
+        materiais: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const boletim = await gerarBoletimDeRDO(rdoTemp);
+      setBoletimGerado(boletim);
+      setActiveTab('boletim');
+      
+      toast({
+        title: "Boletim gerado!",
+        description: "Confira os valores calculados automaticamente.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao gerar boletim",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   const onSubmit = async (data: RDOFormData) => {
@@ -881,11 +961,33 @@ export function CreateRDO() {
             </CardContent>
           </Card>
 
+          {/* Boletim de Medição */}
+          {boletimGerado && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Boletim de Medição Gerado</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BoletimMedicaoCompleto boletim={boletimGerado} readOnly />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Actions */}
           <div className="flex justify-end gap-4">
             <Button type="button" variant="outline" onClick={() => navigate('/rdo')}>
               Cancelar
             </Button>
+            {!boletimGerado && form.watch('equipes').length > 0 && (
+              <Button 
+                type="button" 
+                variant="secondary"
+                onClick={handleGerarBoletim}
+                disabled={loadingBoletim}
+              >
+                {loadingBoletim ? 'Gerando...' : 'Gerar Boletim'}
+              </Button>
+            )}
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>Salvando...</>

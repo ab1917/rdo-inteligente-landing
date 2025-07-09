@@ -82,6 +82,14 @@ export interface Funcionario {
   especialidades: string[];
   certificacoes?: Certificacao[];
   valor_hora?: number;
+  // Configurações de jornada e HH
+  jornada_normal_dia: number; // ex: 8 horas
+  limite_he_semanal: number; // ex: 10 horas extras por semana
+  horario_noturno_inicio: string; // ex: "22:00"
+  horario_noturno_fim: string; // ex: "05:00"
+  percentual_he_60: number; // padrão 1.6
+  percentual_he_100: number; // padrão 2.0
+  adicional_noturno: number; // padrão 0.25 = 25%
 }
 
 export interface Equipe {
@@ -302,4 +310,87 @@ export interface Activity {
   assignedTeam: string;
   dependencies: string[];
   critical: boolean;
+}
+
+// Boletim de Medição
+export interface BoletimMedicao {
+  id: string;
+  rdo_id: string;
+  data: string;
+  funcionarios: FuncionarioBoletim[];
+  equipamentos: EquipamentoBoletim[];
+  materiais: MaterialBoletim[];
+  resumo_financeiro: ResumoFinanceiro;
+  status: 'rascunho' | 'aprovado' | 'faturado';
+  criado_em: string;
+  aprovado_em?: string;
+  aprovado_por?: string;
+}
+
+export interface FuncionarioBoletim {
+  funcionario_id: string;
+  funcionario_nome: string;
+  cargo: string;
+  valor_hora_normal: number;
+  // Horas trabalhadas por tipo
+  hh_normais: number;
+  hh_extras_60: number;
+  hh_extras_100: number;
+  hh_noturnas: number;
+  hh_domingo_feriado: number;
+  // Valores calculados
+  valor_hh_normais: number;
+  valor_hh_extras_60: number;
+  valor_hh_extras_100: number;
+  valor_hh_noturnas: number;
+  valor_hh_domingo_feriado: number;
+  valor_total: number;
+  // Controle semanal
+  hh_extras_semana_atual: number;
+  limite_he_atingido: boolean;
+}
+
+export interface EquipamentoBoletim {
+  equipamento_id: string;
+  equipamento_nome: string;
+  categoria: string;
+  horas_utilizadas: number;
+  valor_hora: number;
+  valor_total: number;
+  responsavel: string;
+}
+
+export interface MaterialBoletim {
+  material_id: string;
+  material_nome: string;
+  categoria: string;
+  quantidade_utilizada: number;
+  unidade: string;
+  valor_unitario: number;
+  valor_total: number;
+}
+
+export interface ResumoFinanceiro {
+  total_funcionarios: number;
+  total_equipamentos: number;
+  total_materiais: number;
+  total_geral: number;
+  // Detalhamento por tipo de HH
+  total_hh_normais: number;
+  total_hh_extras_60: number;
+  total_hh_extras_100: number;
+  total_hh_noturnas: number;
+  total_hh_domingo_feriado: number;
+}
+
+export interface ClassificacaoHH {
+  funcionario_id: string;
+  hora_inicio: string;
+  hora_fim: string;
+  total_horas: number;
+  hh_normais: number;
+  hh_extras_60: number;
+  hh_extras_100: number;
+  hh_noturnas: number;
+  eh_domingo_feriado: boolean;
 }
