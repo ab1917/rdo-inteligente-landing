@@ -5,6 +5,9 @@ import { Users, TrendingUp, DollarSign, Clock, Plus, AlertTriangle, CheckCircle 
 import { Link } from "react-router-dom";
 import { useCRMIntegration } from "@/hooks/useCRMIntegration";
 import { useFinanceiroIntegrado } from "@/hooks/useFinanceiroIntegrado";
+import CreateLeadDialog from "@/components/crm/CreateLeadDialog";
+import CreateOportunidadeDialog from "@/components/crm/CreateOportunidadeDialog";
+import PipelineBoard from "@/components/crm/PipelineBoard";
 
 const CRMDashboard = () => {
   const { dashboard, oportunidades, contratos, loading } = useCRMIntegration();
@@ -61,12 +64,8 @@ const CRMDashboard = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button asChild>
-            <Link to="/leads/novo">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Lead
-            </Link>
-          </Button>
+          <CreateLeadDialog />
+          <CreateOportunidadeDialog />
         </div>
       </div>
 
@@ -262,6 +261,9 @@ const CRMDashboard = () => {
         </Card>
       </div>
 
+      {/* Pipeline Visual Completo */}
+      <PipelineBoard />
+      
       {/* Ações Rápidas */}
       <Card>
         <CardHeader>
