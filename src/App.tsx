@@ -17,6 +17,8 @@ import { CRMDashboard, LeadsList, OportunidadesList, ClientesList } from "./page
 import { CronogramaList } from "./pages/cronograma";
 import { BoletimList, CreateBoletim, BoletimDetail } from "./pages/boletim";
 import { FinanceiroDashboard } from "./pages/financeiro";
+import { SuperAdminDashboard } from "./pages/super-admin/Dashboard";
+import { SuperAdminCompanies } from "./pages/super-admin/Companies";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -158,6 +160,22 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <FinanceiroDashboard />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/super-admin" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <SuperAdminDashboard />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/super-admin/companies" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <SuperAdminCompanies />
                 </AppLayout>
               </ProtectedRoute>
             } />

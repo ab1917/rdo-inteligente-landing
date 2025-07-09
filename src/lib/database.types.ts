@@ -1,9 +1,85 @@
 export interface Database {
   public: {
     Tables: {
+      companies: {
+        Row: {
+          id: string;
+          nome: string;
+          cnpj: string;
+          email: string;
+          telefone?: string;
+          endereco?: string;
+          cidade?: string;
+          estado?: string;
+          cep?: string;
+          plano: 'starter' | 'professional' | 'enterprise';
+          status: 'ativa' | 'suspensa' | 'cancelada' | 'trial';
+          data_criacao: string;
+          data_expiracao?: string;
+          configuracoes: Record<string, any>;
+          limites: {
+            obras: number;
+            usuarios: number;
+            armazenamento_gb: number;
+          };
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['companies']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['companies']['Insert']>;
+      };
+      users: {
+        Row: {
+          id: string;
+          company_id?: string;
+          nome: string;
+          email: string;
+          role: 'super_admin' | 'admin' | 'manager' | 'engineer' | 'viewer';
+          status: 'ativo' | 'inativo' | 'pendente';
+          configuracoes: Record<string, any>;
+          ultimo_acesso?: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['users']['Row'], 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['users']['Insert']>;
+      };
+      subscriptions: {
+        Row: {
+          id: string;
+          company_id: string;
+          plano: string;
+          valor: number;
+          status: 'ativa' | 'cancelada' | 'suspensa' | 'trial';
+          data_inicio: string;
+          data_fim?: string;
+          gateway_pagamento?: string;
+          external_id?: string;
+          metadados: Record<string, any>;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['subscriptions']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['subscriptions']['Insert']>;
+      };
+      system_settings: {
+        Row: {
+          id: string;
+          chave: string;
+          valor: Record<string, any>;
+          descricao?: string;
+          categoria?: string;
+          criado_por?: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['system_settings']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['system_settings']['Insert']>;
+      };
       funcionarios: {
         Row: {
           id: string;
+          company_id: string;
           nome: string;
           cargo: string;
           salario: number;

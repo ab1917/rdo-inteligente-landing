@@ -4,22 +4,88 @@
 -- Habilitar extensões necessárias
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Funcionários
+-- Empresas/Construtoras (multi-tenant)
+CREATE TABLE IF NOT EXISTS companies (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nome VARCHAR(255) NOT NULL,
+  cnpj VARCHAR(18) UNIQUE NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  telefone VARCHAR(20),
+  endereco TEXT,
+  cidade VARCHAR(100),
+  estado VARCHAR(2),
+  cep VARCHAR(10),
+  plano VARCHAR(20) DEFAULT 'starter' CHECK (plano IN ('starter', 'professional', 'enterprise')),
+  status VARCHAR(20) DEFAULT 'ativa' CHECK (status IN ('ativa', 'suspensa', 'cancelada', 'trial')),
+  data_criacao DATE DEFAULT CURRENT_DATE,
+  data_expiracao DATE,
+  configuracoes JSONB DEFAULT '{}',
+  limites JSONB DEFAULT '{"obras": 3, "usuarios": 10, "armazenamento_gb": 10}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Usuários do sistema (integração com Supabase Auth)
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  company_id UUID REFERENCES companies(id),
+  nome VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  role VARCHAR(20) DEFAULT 'viewer' CHECK (role IN ('super_admin', 'admin', 'manager', 'engineer', 'viewer')),
+  status VARCHAR(20) DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo', 'pendente')),
+  configuracoes JSONB DEFAULT '{}',
+  ultimo_acesso TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Assinaturas e histórico de planos
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id UUID REFERENCES companies(id) NOT NULL,
+  plano VARCHAR(20) NOT NULL,
+  valor DECIMAL(10,2) NOT NULL,
+  status VARCHAR(20) DEFAULT 'ativa' CHECK (status IN ('ativa', 'cancelada', 'suspensa', 'trial')),
+  data_inicio DATE NOT NULL,
+  data_fim DATE,
+  gateway_pagamento VARCHAR(50),
+  external_id VARCHAR(255),
+  metadados JSONB DEFAULT '{}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Configurações globais do sistema
+CREATE TABLE IF NOT EXISTS system_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  chave VARCHAR(100) UNIQUE NOT NULL,
+  valor JSONB NOT NULL,
+  descricao TEXT,
+  categoria VARCHAR(50),
+  criado_por UUID REFERENCES users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Funcionários (agora com company_id)
 CREATE TABLE IF NOT EXISTS funcionarios (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id UUID REFERENCES companies(id) NOT NULL,
   nome VARCHAR(255) NOT NULL,
   cargo VARCHAR(100) NOT NULL,
   salario DECIMAL(10,2) NOT NULL,
   data_admissao DATE NOT NULL,
-  cpf VARCHAR(14) UNIQUE NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
+  cpf VARCHAR(14) NOT NULL,
+  email VARCHAR(255) NOT NULL,
   telefone VARCHAR(20),
   endereco TEXT,
   status VARCHAR(20) DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo', 'ferias', 'afastado')),
   especialidades TEXT[] DEFAULT '{}',
   certificacoes JSONB DEFAULT '[]',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(company_id, cpf),
+  UNIQUE(company_id, email)
 );
 
 -- Equipes
@@ -306,7 +372,104 @@ BEGIN
 END;
 $$;
 
+-- Habilitar Row Level Security (RLS)
+ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE funcionarios ENABLE ROW LEVEL SECURITY;
+ALTER TABLE equipes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE equipamentos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE obras ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rdos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE clientes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE oportunidades ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orcamentos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contratos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE boletins_medicao ENABLE ROW LEVEL SECURITY;
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE activities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Políticas RLS para multi-tenant
+-- Companies: usuários só veem sua própria empresa (exceto super_admin)
+CREATE POLICY "Users can view own company" ON companies
+  FOR SELECT USING (
+    auth.uid() IN (
+      SELECT id FROM users WHERE company_id = companies.id
+    ) OR
+    auth.uid() IN (
+      SELECT id FROM users WHERE role = 'super_admin'
+    )
+  );
+
+-- Users: usuários veem apenas colegas da mesma empresa
+CREATE POLICY "Users can view company users" ON users
+  FOR SELECT USING (
+    company_id = (
+      SELECT company_id FROM users WHERE id = auth.uid()
+    ) OR
+    auth.uid() IN (
+      SELECT id FROM users WHERE role = 'super_admin'
+    )
+  );
+
+-- Funcionários: isolamento por empresa
+CREATE POLICY "Company data isolation" ON funcionarios
+  FOR ALL USING (
+    company_id = (
+      SELECT company_id FROM users WHERE id = auth.uid()
+    ) OR
+    auth.uid() IN (
+      SELECT id FROM users WHERE role = 'super_admin'
+    )
+  );
+
+-- Aplicar mesma política para todas as tabelas principais
+CREATE POLICY "Company data isolation" ON equipes
+  FOR ALL USING (
+    id IN (
+      SELECT e.id FROM equipes e
+      JOIN funcionarios f ON f.id = e.lider_id
+      WHERE f.company_id = (
+        SELECT company_id FROM users WHERE id = auth.uid()
+      )
+    ) OR
+    auth.uid() IN (
+      SELECT id FROM users WHERE role = 'super_admin'
+    )
+  );
+
+-- Inserir dados iniciais
+
+-- Super Admin inicial
+INSERT INTO companies (id, nome, cnpj, email, plano, status, limites) VALUES
+  ('00000000-0000-0000-0000-000000000000', 'Super Admin', '00.000.000/0000-00', 'superadmin@sistema.com', 'enterprise', 'ativa', '{}')
+ON CONFLICT (id) DO NOTHING;
+
+-- Empresa demo para testes
+INSERT INTO companies (nome, cnpj, email, plano, status, data_expiracao, limites) VALUES
+  ('Construtora Demo Ltda', '12.345.678/0001-90', 'contato@construtorademo.com', 'professional', 'trial', CURRENT_DATE + INTERVAL '30 days', '{"obras": 100, "usuarios": 50, "armazenamento_gb": 100}')
+ON CONFLICT (cnpj) DO NOTHING;
+
+-- Configurações globais do sistema
+INSERT INTO system_settings (chave, valor, descricao, categoria) VALUES
+  ('planos_config', '{
+    "starter": {"preco": 297, "obras": 3, "usuarios": 10, "armazenamento_gb": 10},
+    "professional": {"preco": 597, "obras": -1, "usuarios": 50, "armazenamento_gb": 100},
+    "enterprise": {"preco": 1297, "obras": -1, "usuarios": -1, "armazenamento_gb": -1}
+  }', 'Configuração dos planos e limites', 'planos'),
+  ('sistema_config', '{
+    "manutencao": false,
+    "versao": "1.0.0",
+    "notificacoes_ativas": true
+  }', 'Configurações gerais do sistema', 'sistema')
+ON CONFLICT (chave) DO NOTHING;
+
 -- Comentários nas tabelas
+COMMENT ON TABLE companies IS 'Empresas/Construtoras do sistema';
+COMMENT ON TABLE users IS 'Usuários do sistema integrados com Supabase Auth';
+COMMENT ON TABLE subscriptions IS 'Histórico de assinaturas e planos';
+COMMENT ON TABLE system_settings IS 'Configurações globais do sistema';
 COMMENT ON TABLE funcionarios IS 'Cadastro de funcionários da empresa';
 COMMENT ON TABLE equipes IS 'Equipes de trabalho e suas composições';
 COMMENT ON TABLE equipamentos IS 'Inventário de equipamentos da empresa';
