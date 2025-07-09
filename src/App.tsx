@@ -13,6 +13,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { RDOList, CreateRDO } from "./pages/rdo";
 import { BudgetList } from "./pages/budgets";
 import { EquipeList, FuncionarioList, EquipamentoList } from "./pages/equipes";
+import { CRMDashboard, LeadsList, OportunidadesList, ClientesList } from "./pages/crm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,6 +83,38 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <EquipamentoList />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/crm" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <CRMDashboard />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/leads" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <LeadsList />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/oportunidades" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <OportunidadesList />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/clientes" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ClientesList />
                 </AppLayout>
               </ProtectedRoute>
             } />
