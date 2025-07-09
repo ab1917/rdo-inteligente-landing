@@ -18,7 +18,8 @@ import {
   Sun,
   Cloud,
   CloudRain,
-  Wind
+  Wind,
+  BarChart3
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -229,6 +230,13 @@ export function RDOList() {
                           </Link>
                         </Button>
                       )}
+
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/rdo/${rdo.id}/relatorio`}>
+                          <BarChart3 className="mr-2 h-4 w-4" />
+                          Relatório
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
