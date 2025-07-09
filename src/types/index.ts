@@ -19,6 +19,13 @@ export interface RDO {
   os_numero?: string; // Ordem de serviço
   data: string;
   responsavel: string;
+  // Integração com orçamento
+  id_contrato?: string; // Vínculo com orçamento aprovado
+  hh_executado_total: number;
+  hh_previsto_dia: number;
+  desvio_produtividade: number;
+  custo_hh_realizado: number;
+  validacao_tecnica: ValidacaoTecnica;
   // Condições ambientais
   clima: 'sol' | 'chuva' | 'nublado' | 'vento';
   temperatura: number;
@@ -211,4 +218,56 @@ export interface EquipamentoMaster {
   certificacao?: string;
   data_aquisicao?: string;
   vida_util_anos?: number;
+}
+
+// Integração CRM → Orçamento → RDO
+export interface ValidacaoTecnica {
+  funcionario_certificado: boolean;
+  equipamento_calibrado: boolean;
+  conformidade_nr: string[];
+  alertas: string[];
+}
+
+export interface Oportunidade {
+  id: string;
+  id_lead: string;
+  descricao_escopo: string;
+  valor_estimado: number;
+  status: 'negociacao' | 'proposta_enviada' | 'aprovada' | 'perdida';
+  responsavel_comercial: string;
+  data_criacao: string;
+}
+
+export interface Orcamento {
+  id: string;
+  id_oportunidade: string;
+  tipo: 'obra_civil' | 'manutencao_industrial';
+  composicoes: ComposicaoOrcamento[];
+  hh_previsto_total: number;
+  valor_hh_medio: number;
+  valor_total: number;
+  status: 'em_elaboracao' | 'enviado' | 'aprovado' | 'recusado';
+  data_criacao: string;
+}
+
+export interface ComposicaoOrcamento {
+  id: string;
+  id_orcamento: string;
+  descricao: string;
+  codigo_tcpo_sinapi?: string;
+  tipo: 'material' | 'hh' | 'equipamento';
+  quantidade: number;
+  valor_unitario: number;
+  hh_unitario?: number;
+  valor_hh?: number;
+}
+
+export interface Contrato {
+  id: string;
+  id_orcamento: string;
+  data_assinatura: string;
+  prazo_execucao: number; // dias
+  valor_fechado: number;
+  tipo_execucao: 'escopo' | 'por_hh' | 'hibrido';
+  status: 'ativo' | 'concluido' | 'cancelado';
 }

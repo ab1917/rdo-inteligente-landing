@@ -146,6 +146,17 @@ export function CreateRDO() {
         local: mockObras.find(o => o.nome === data.obra)?.endereco || 'Local Padrão',
         data: data.data,
         responsavel: data.responsavel,
+        // Dados de HH e controle - valores padrão para novo RDO
+        hh_executado_total: 0,
+        hh_previsto_dia: 8,
+        desvio_produtividade: 0,
+        custo_hh_realizado: 0,
+        validacao_tecnica: {
+          funcionario_certificado: false,
+          equipamento_calibrado: false,
+          conformidade_nr: [],
+          alertas: ['RDO em elaboração - validações pendentes']
+        },
         clima: data.clima,
         temperatura: data.temperatura,
         observacoes: data.observacoes,

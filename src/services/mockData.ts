@@ -396,6 +396,17 @@ export const mockRDOs: RDO[] = [
     local: 'Rua das Flores, 123 - Bairro Jardim',
     data: '2024-01-08',
     responsavel: 'João Silva',
+    // Dados de HH e controle
+    hh_executado_total: 16,
+    hh_previsto_dia: 16,
+    desvio_produtividade: 0,
+    custo_hh_realizado: 750,
+    validacao_tecnica: {
+      funcionario_certificado: true,
+      equipamento_calibrado: true,
+      conformidade_nr: ['NR-18', 'NR-35'],
+      alertas: []
+    },
     clima: 'sol',
     temperatura: 28,
     status: 'aprovado',
@@ -465,6 +476,17 @@ export const mockRDOs: RDO[] = [
     local: 'Av. Principal, 456 - Centro',
     data: '2024-01-08',
     responsavel: 'Maria Santos',
+    // Dados de HH e controle
+    hh_executado_total: 8,
+    hh_previsto_dia: 8,
+    desvio_produtividade: 0,
+    custo_hh_realizado: 336,
+    validacao_tecnica: {
+      funcionario_certificado: true,
+      equipamento_calibrado: false,
+      conformidade_nr: ['NR-18'],
+      alertas: ['Equipamento necessita calibração']
+    },
     clima: 'nublado',
     temperatura: 22,
     status: 'pendente',
@@ -514,6 +536,17 @@ export const mockRDOs: RDO[] = [
     os_numero: 'OS-2024-0156',
     data: '2024-01-09',
     responsavel: 'Carlos Técnico',
+    // Dados de HH e controle
+    hh_executado_total: 16,
+    hh_previsto_dia: 16,
+    desvio_produtividade: -0.25,
+    custo_hh_realizado: 1000,
+    validacao_tecnica: {
+      funcionario_certificado: true,
+      equipamento_calibrado: true,
+      conformidade_nr: ['NR-10', 'NR-12'],
+      alertas: []
+    },
     clima: 'sol',
     temperatura: 32,
     status: 'em_execucao',
