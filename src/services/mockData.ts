@@ -1,4 +1,35 @@
-import { RDO, Funcionario, Obra, DashboardMetrics } from '@/types';
+import { RDO, Funcionario, Obra, DashboardMetrics, Equipamento } from '@/types';
+
+// Mock equipamentos disponíveis
+export const mockEquipamentos: Equipamento[] = [
+  {
+    id: '1',
+    nome: 'Betoneira 400L',
+    tipo: 'betoneira',
+    horaInicio: '07:00',
+    horaFim: '16:00',
+    horasUsadas: 9,
+    status: 'disponivel'
+  },
+  {
+    id: '2',
+    nome: 'Escavadeira Cat 320',
+    tipo: 'escavadeira',
+    horaInicio: '08:00',
+    horaFim: '17:00',
+    horasUsadas: 9,
+    status: 'em_uso'
+  },
+  {
+    id: '3',
+    nome: 'Guindaste Torre',
+    tipo: 'guindaste',
+    horaInicio: '07:00',
+    horaFim: '18:00',
+    horasUsadas: 11,
+    status: 'manutencao'
+  }
+];
 
 // Mock data for demonstration
 export const mockObras: Obra[] = [

@@ -14,10 +14,12 @@ export interface RDO {
   responsavel: string;
   clima: 'sol' | 'chuva' | 'nublado' | 'vento';
   temperatura: number;
-  status: 'rascunho' | 'pendente' | 'aprovado';
+  status: 'rascunho' | 'pendente' | 'aprovado' | 'alerta';
   atividades: Atividade[];
   equipes: EquipeRDO[];
   fotos: Foto[];
+  equipamentos?: Equipamento[];
+  ocorrencias?: Ocorrencia[];
   observacoes?: string;
   assinatura?: string;
   createdAt: string;
@@ -86,6 +88,27 @@ export interface Obra {
   status: 'planejamento' | 'em_andamento' | 'pausada' | 'concluida';
   valor?: number;
   engenheiro: string;
+}
+
+export interface Equipamento {
+  id: string;
+  nome: string;
+  tipo: string;
+  horaInicio: string;
+  horaFim: string;
+  horasUsadas: number;
+  status: 'disponivel' | 'em_uso' | 'manutencao';
+  observacoes?: string;
+}
+
+export interface Ocorrencia {
+  id: string;
+  tipo: 'acidente' | 'paralisacao' | 'mudanca_projeto' | 'clima_extremo' | 'entrega';
+  descricao: string;
+  gravidade: 'baixa' | 'media' | 'alta' | 'critica';
+  timestamp: string;
+  responsavel: string;
+  acoes_tomadas?: string;
 }
 
 export interface DashboardMetrics {

@@ -21,10 +21,15 @@ import {
   Cloud,
   CloudRain,
   Wind,
-  Thermometer
+  Thermometer,
+  Wrench,
+  AlertTriangle
 } from 'lucide-react';
 import { mockObras, mockFuncionarios } from '@/services/mockData';
-import { RDO } from '@/types';
+import { RDO, Equipamento, Ocorrencia } from '@/types';
+import { PhotoUpload } from '@/components/rdo/PhotoUpload';
+import { RDOValidations } from '@/components/rdo/RDOValidations';
+import { StatusBadge } from '@/components/rdo/StatusBadge';
 
 const rdoSchema = z.object({
   obra: z.string().min(1, 'Selecione uma obra'),
@@ -44,7 +49,20 @@ const rdoSchema = z.object({
     funcionario: z.string().min(1, 'Selecione um funcionário'),
     horaInicio: z.string().min(1, 'Hora de início é obrigatória'),
     horaFim: z.string().min(1, 'Hora de fim é obrigatória')
-  })).min(1, 'Adicione pelo menos um membro da equipe')
+  })).min(1, 'Adicione pelo menos um membro da equipe'),
+  equipamentos: z.array(z.object({
+    nome: z.string().min(1, 'Nome do equipamento é obrigatório'),
+    tipo: z.string().min(1, 'Tipo é obrigatório'),
+    horaInicio: z.string().min(1, 'Hora de início é obrigatória'),
+    horaFim: z.string().min(1, 'Hora de fim é obrigatória')
+  })).optional(),
+  ocorrencias: z.array(z.object({
+    tipo: z.enum(['acidente', 'paralisacao', 'mudanca_projeto', 'clima_extremo', 'entrega']),
+    descricao: z.string().min(1, 'Descrição é obrigatória'),
+    gravidade: z.enum(['baixa', 'media', 'alta', 'critica']),
+    responsavel: z.string().min(1, 'Responsável é obrigatório'),
+    acoes_tomadas: z.string().optional()
+  })).optional()
 });
 
 type RDOFormData = z.infer<typeof rdoSchema>;
@@ -61,6 +79,7 @@ export function CreateRDO() {
   const { createRDO, loading } = useRDO();
   const { toast } = useToast();
   const [photos, setPhotos] = useState<File[]>([]);
+  const [rdoStatus, setRdoStatus] = useState<RDO['status']>('rascunho');
 
   const form = useForm<RDOFormData>({
     resolver: zodResolver(rdoSchema),
@@ -82,7 +101,9 @@ export function CreateRDO() {
         funcionario: '',
         horaInicio: '07:00',
         horaFim: '17:00'
-      }]
+      }],
+      equipamentos: [],
+      ocorrencias: []
     }
   });
 
@@ -94,6 +115,16 @@ export function CreateRDO() {
   const { fields: equipeFields, append: appendEquipe, remove: removeEquipe } = useFieldArray({
     control: form.control,
     name: 'equipes'
+  });
+
+  const { fields: equipamentoFields, append: appendEquipamento, remove: removeEquipamento } = useFieldArray({
+    control: form.control,
+    name: 'equipamentos'
+  });
+
+  const { fields: ocorrenciaFields, append: appendOcorrencia, remove: removeOcorrencia } = useFieldArray({
+    control: form.control,
+    name: 'ocorrencias'
   });
 
   const calcularHoras = (inicio: string, fim: string): number => {
@@ -509,10 +540,310 @@ export function CreateRDO() {
             </CardContent>
           </Card>
 
-          {/* Observações */}
+          {/* Equipamentos */}
           <Card>
             <CardHeader>
-              <CardTitle>Observações</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <Wrench className="h-5 w-5" />
+                  Equipamentos Utilizados
+                </CardTitle>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => appendEquipamento({
+                    nome: '',
+                    tipo: '',
+                    horaInicio: '07:00',
+                    horaFim: '17:00'
+                  })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Adicionar
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {equipamentoFields.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  Nenhum equipamento adicionado
+                </p>
+              ) : (
+                equipamentoFields.map((field, index) => (
+                  <div key={field.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg">
+                    <FormField
+                      control={form.control}
+                      name={`equipamentos.${index}.nome`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ex: Betoneira" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`equipamentos.${index}.tipo`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="escavadeira">Escavadeira</SelectItem>
+                              <SelectItem value="betoneira">Betoneira</SelectItem>
+                              <SelectItem value="guindaste">Guindaste</SelectItem>
+                              <SelectItem value="retroescavadeira">Retroescavadeira</SelectItem>
+                              <SelectItem value="compactador">Compactador</SelectItem>
+                              <SelectItem value="andaime">Andaime</SelectItem>
+                              <SelectItem value="outro">Outro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`equipamentos.${index}.horaInicio`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Início</FormLabel>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`equipamentos.${index}.horaFim`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Fim</FormLabel>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex items-end">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeEquipamento(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Ocorrências */}
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Ocorrências e Eventos
+                </CardTitle>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => appendOcorrencia({
+                    tipo: 'entrega',
+                    descricao: '',
+                    gravidade: 'baixa',
+                    responsavel: '',
+                    acoes_tomadas: ''
+                  })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Adicionar
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {ocorrenciaFields.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  Nenhuma ocorrência registrada
+                </p>
+              ) : (
+                ocorrenciaFields.map((field, index) => (
+                  <div key={field.id} className="space-y-4 p-4 border rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium">Ocorrência {index + 1}</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeOcorrencia(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name={`ocorrencias.${index}.tipo`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="acidente">Acidente</SelectItem>
+                                <SelectItem value="paralisacao">Paralização</SelectItem>
+                                <SelectItem value="mudanca_projeto">Mudança no Projeto</SelectItem>
+                                <SelectItem value="clima_extremo">Clima Extremo</SelectItem>
+                                <SelectItem value="entrega">Entrega de Material</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`ocorrencias.${index}.gravidade`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gravidade</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="baixa">🟢 Baixa</SelectItem>
+                                <SelectItem value="media">🟡 Média</SelectItem>
+                                <SelectItem value="alta">🟠 Alta</SelectItem>
+                                <SelectItem value="critica">🔴 Crítica</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`ocorrencias.${index}.responsavel`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Responsável</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Nome do responsável" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name={`ocorrencias.${index}.descricao`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Descreva a ocorrência..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`ocorrencias.${index}.acoes_tomadas`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ações Tomadas (opcional)</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Descreva as ações tomadas..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Fotos e Evidências */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Fotos e Evidências
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PhotoUpload 
+                photos={photos} 
+                onPhotosChange={setPhotos}
+                maxFiles={20}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Validações Inteligentes */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Validações Inteligentes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RDOValidations 
+                formData={form.watch()}
+                equipes={form.watch('equipes').map((equipe, index) => ({
+                  id: (index + 1).toString(),
+                  funcionario: equipe.funcionario,
+                  cargo: mockFuncionarios.find(f => f.nome === equipe.funcionario)?.cargo || '',
+                  horaInicio: equipe.horaInicio,
+                  horaFim: equipe.horaFim,
+                  horasTrabalhadas: calcularHoras(equipe.horaInicio, equipe.horaFim)
+                }))}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Status e Observações */}
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Status e Observações</CardTitle>
+                <StatusBadge status={rdoStatus} />
+              </div>
             </CardHeader>
             <CardContent>
               <FormField
@@ -520,6 +851,7 @@ export function CreateRDO() {
                 name="observacoes"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>Observações Gerais</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Observações gerais sobre o dia de trabalho..."

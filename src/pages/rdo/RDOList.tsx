@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/rdo/StatusBadge';
 import { 
   Plus, 
   Search, 
@@ -124,6 +125,7 @@ export function RDOList() {
                   <SelectItem value="rascunho">Rascunho</SelectItem>
                   <SelectItem value="pendente">Pendente</SelectItem>
                   <SelectItem value="aprovado">Aprovado</SelectItem>
+                  <SelectItem value="alerta">Alerta</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -179,9 +181,7 @@ export function RDOList() {
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <Badge variant={statusColors[rdo.status]}>
-                        {statusLabels[rdo.status]}
-                      </Badge>
+                      <StatusBadge status={rdo.status} />
                     </div>
                   </div>
                 </CardHeader>
