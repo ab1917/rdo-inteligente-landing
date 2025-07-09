@@ -1,47 +1,55 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { superAdminService, type GlobalMetrics, type CompanyActivity } from '@/services/superAdminService';
 import { 
   Building2, 
   Users, 
-  DollarSign, 
-  TrendingUp,
+  TrendingUp, 
+  DollarSign,
+  Activity,
+  Server,
   AlertTriangle,
   CheckCircle,
-  Clock,
-  Settings
+  Loader2
 } from 'lucide-react';
-import { useSuperAdmin } from '@/hooks/useSuperAdmin';
 
 export const SuperAdminDashboard = () => {
-  const { metrics, companies, loading } = useSuperAdmin();
+  const [metrics, setMetrics] = useState<GlobalMetrics | null>(null);
+  const [activities, setActivities] = useState<CompanyActivity[]>([]);
+  const [systemHealth, setSystemHealth] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (loading) {
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [metricsData, activitiesData, healthData] = await Promise.all([
+          superAdminService.getGlobalMetrics(),
+          superAdminService.getCompanyActivities(),
+          superAdminService.getSystemHealth()
+        ]);
+
+        setMetrics(metricsData);
+        setActivities(activitiesData);
+        setSystemHealth(healthData);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      ativa: { variant: 'default' as const, icon: CheckCircle, color: 'text-green-600' },
-      trial: { variant: 'secondary' as const, icon: Clock, color: 'text-orange-600' },
-      suspensa: { variant: 'destructive' as const, icon: AlertTriangle, color: 'text-red-600' }
-    };
-
-    const config = variants[status as keyof typeof variants] || variants.suspensa;
-    const Icon = config.icon;
-
-    return (
-      <Badge variant={config.variant} className="gap-1">
-        <Icon className="h-3 w-3" />
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
-  };
 
   return (
     <div className="space-y-6">
@@ -53,8 +61,8 @@ export const SuperAdminDashboard = () => {
           </p>
         </div>
         <Button>
-          <Settings className="h-4 w-4 mr-2" />
-          Configurações
+          <Activity className="mr-2 h-4 w-4" />
+          Relatório Completo
         </Button>
       </div>
 
@@ -93,7 +101,7 @@ export const SuperAdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              R$ {metrics?.monthlyRevenue.toLocaleString('pt-BR') || '0'}
+              R$ {(metrics?.totalRevenue || 0).toLocaleString('pt-BR')}
             </div>
             <p className="text-xs text-muted-foreground">
               Baseado nos planos ativos
@@ -107,7 +115,7 @@ export const SuperAdminDashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{metrics?.growthRate || 0}%</div>
+            <div className="text-2xl font-bold">+{metrics?.revenueGrowth || 0}%</div>
             <p className="text-xs text-muted-foreground">
               Últimos 30 dias
             </p>
@@ -122,30 +130,17 @@ export const SuperAdminDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {companies.slice(0, 10).map((company) => (
-              <div key={company.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">{company.nome}</h4>
-                    {getStatusBadge(company.status)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{company.email}</p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>Plano: {company.plano}</span>
-                    <span>CNPJ: {company.cnpj}</span>
-                    {company.data_expiracao && (
-                      <span>Expira: {new Date(company.data_expiracao).toLocaleDateString('pt-BR')}</span>
-                    )}
-                  </div>
+            {activities.slice(0, 5).map((activity) => (
+              <div key={activity.id} className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">{activity.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Plano {activity.plan} • {activity.activeUsers} usuários
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="capitalize">
-                    {company.plano}
-                  </Badge>
-                  <Button variant="outline" size="sm">
-                    Gerenciar
-                  </Button>
-                </div>
+                <Badge variant="outline" className="text-xs">
+                  R$ {activity.monthlyRevenue}
+                </Badge>
               </div>
             ))}
           </div>

@@ -1,83 +1,63 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCompanyManagement } from '@/hooks/useCompanyManagement';
 import { 
   Building2, 
-  Search, 
-  Filter,
-  MoreHorizontal,
+  Users, 
+  Calendar,
+  HardDrive,
+  TrendingUp,
+  Settings,
   Eye,
-  Ban,
-  CheckCircle,
-  Clock,
-  Zap
+  Loader2
 } from 'lucide-react';
-import { useSuperAdmin } from '@/hooks/useSuperAdmin';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+
+const getPlanColor = (plan: string) => {
+  switch (plan) {
+    case 'starter': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+    case 'professional': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    case 'enterprise': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+  }
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'active': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    case 'trial': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+    case 'suspended': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+  }
+};
+
+const getPlanDisplayName = (plan: string) => {
+  switch (plan) {
+    case 'starter': return 'Starter';
+    case 'professional': return 'Professional';
+    case 'enterprise': return 'Enterprise';
+    default: return plan;
+  }
+};
+
+const getStatusDisplayName = (status: string) => {
+  switch (status) {
+    case 'active': return 'Ativo';
+    case 'trial': return 'Trial';
+    case 'suspended': return 'Suspenso';
+    default: return status;
+  }
+};
 
 export const SuperAdminCompanies = () => {
-  const { companies, updateCompanyPlan, suspendCompany, activateCompany, extendTrial, loading } = useSuperAdmin();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [planFilter, setPlanFilter] = useState('all');
+  const { companies, isLoading, updateCompanyPlan, updateCompanyStatus } = useCompanyManagement();
 
-  const filteredCompanies = companies.filter(company => {
-    const matchesSearch = company.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         company.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         company.cnpj.includes(searchTerm);
-    
-    const matchesStatus = statusFilter === 'all' || company.status === statusFilter;
-    const matchesPlan = planFilter === 'all' || company.plano === planFilter;
-
-    return matchesSearch && matchesStatus && matchesPlan;
-  });
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      ativa: { variant: 'default' as const, icon: CheckCircle, color: 'text-green-600' },
-      trial: { variant: 'secondary' as const, icon: Clock, color: 'text-orange-600' },
-      suspensa: { variant: 'destructive' as const, icon: Ban, color: 'text-red-600' }
-    };
-
-    const config = variants[status as keyof typeof variants] || variants.suspensa;
-    const Icon = config.icon;
-
-    return (
-      <Badge variant={config.variant} className="gap-1">
-        <Icon className="h-3 w-3" />
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
-  };
-
-  const getPlanBadge = (plan: string) => {
-    const colors = {
-      starter: 'bg-blue-100 text-blue-800',
-      professional: 'bg-purple-100 text-purple-800',
-      enterprise: 'bg-gold-100 text-gold-800'
-    };
-
-    return (
-      <Badge variant="outline" className={colors[plan as keyof typeof colors]}>
-        {plan.charAt(0).toUpperCase() + plan.slice(1)}
-      </Badge>
-    );
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -88,149 +68,109 @@ export const SuperAdminCompanies = () => {
         <div>
           <h1 className="text-3xl font-bold">Gestão de Empresas</h1>
           <p className="text-muted-foreground">
-            Gerencie todas as empresas cadastradas no sistema
+            Gerencie todas as empresas cadastradas na plataforma
           </p>
         </div>
         <Button>
-          <Building2 className="h-4 w-4 mr-2" />
+          <Building2 className="mr-2 h-4 w-4" />
           Nova Empresa
         </Button>
       </div>
 
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            Filtros
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por nome, email ou CNPJ..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Status</SelectItem>
-                <SelectItem value="ativa">Ativa</SelectItem>
-                <SelectItem value="trial">Trial</SelectItem>
-                <SelectItem value="suspensa">Suspensa</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={planFilter} onValueChange={setPlanFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Plano" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Planos</SelectItem>
-                <SelectItem value="starter">Starter</SelectItem>
-                <SelectItem value="professional">Professional</SelectItem>
-                <SelectItem value="enterprise">Enterprise</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Lista de Empresas */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Empresas ({filteredCompanies.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {filteredCompanies.map((company) => (
-              <div key={company.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <h4 className="font-medium">{company.nome}</h4>
-                    {getStatusBadge(company.status)}
-                    {getPlanBadge(company.plano)}
+      <div className="grid gap-6">
+        {companies.map((company) => (
+          <Card key={company.id}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Building2 className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <p>{company.email}</p>
-                    <p>CNPJ: {company.cnpj}</p>
-                    <div className="flex items-center gap-4">
-                      <span>Criada em: {new Date(company.data_criacao).toLocaleDateString('pt-BR')}</span>
-                      {company.data_expiracao && (
-                        <span className={company.status === 'trial' ? 'text-orange-600 font-medium' : ''}>
-                          Expira: {new Date(company.data_expiracao).toLocaleDateString('pt-BR')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs">
-                    <span>Obras: {company.limites.obras === -1 ? 'Ilimitadas' : company.limites.obras}</span>
-                    <span>Usuários: {company.limites.usuarios === -1 ? 'Ilimitados' : company.limites.usuarios}</span>
-                    <span>Storage: {company.limites.armazenamento_gb === -1 ? 'Ilimitado' : `${company.limites.armazenamento_gb}GB`}</span>
+                  <div>
+                    <CardTitle className="text-xl">{company.name}</CardTitle>
+                    <CardDescription>
+                      Criada em {new Date(company.created_at).toLocaleDateString('pt-BR')}
+                    </CardDescription>
                   </div>
                 </div>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Eye className="h-4 w-4 mr-2" />
-                      Ver Detalhes
-                    </DropdownMenuItem>
-                    
-                    {company.status === 'ativa' ? (
-                      <DropdownMenuItem onClick={() => suspendCompany(company.id)}>
-                        <Ban className="h-4 w-4 mr-2" />
-                        Suspender
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem onClick={() => activateCompany(company.id)}>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Ativar
-                      </DropdownMenuItem>
-                    )}
-                    
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => updateCompanyPlan(company.id, 'starter')}>
-                      Mudar para Starter
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => updateCompanyPlan(company.id, 'professional')}>
-                      Mudar para Professional
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => updateCompanyPlan(company.id, 'enterprise')}>
-                      Mudar para Enterprise
-                    </DropdownMenuItem>
-                    
-                    {company.status === 'trial' && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => extendTrial(company.id, 30)}>
-                          <Clock className="h-4 w-4 mr-2" />
-                          Estender Trial (30 dias)
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center space-x-2">
+                  <Badge className={getPlanColor(company.plan)}>
+                    {getPlanDisplayName(company.plan)}
+                  </Badge>
+                  <Badge className={getStatusColor(company.status)}>
+                    {getStatusDisplayName(company.status)}
+                  </Badge>
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">{company.user_count} usuários</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">{company.active_projects} projetos</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <HardDrive className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">{company.storage_used}GB usados</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    Atualizada: {new Date(company.updated_at).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="sm">
+                    <Eye className="mr-2 h-4 w-4" />
+                    Visualizar
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Configurar
+                  </Button>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Select
+                    value={company.plan}
+                    onValueChange={(value) => updateCompanyPlan(company.id, value as any)}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="starter">Starter</SelectItem>
+                      <SelectItem value="professional">Professional</SelectItem>
+                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select
+                    value={company.status}
+                    onValueChange={(value) => updateCompanyStatus(company.id, value as any)}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="trial">Trial</SelectItem>
+                      <SelectItem value="suspended">Suspenso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

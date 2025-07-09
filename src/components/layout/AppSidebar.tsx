@@ -138,7 +138,7 @@ export function AppSidebar() {
           {!isCollapsed && (
             <div className="flex flex-col">
               <span className="font-semibold text-sm">RDO Inteligente</span>
-              <span className="text-xs text-muted-foreground">{user?.company}</span>
+              <span className="text-xs text-muted-foreground">{user?.company?.name}</span>
             </div>
           )}
         </div>
