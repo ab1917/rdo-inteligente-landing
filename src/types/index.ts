@@ -398,3 +398,149 @@ export interface ClassificacaoHH {
   hh_noturnas: number;
   eh_domingo_feriado: boolean;
 }
+
+// Entidades CRM Integradas
+export interface Lead {
+  id: string;
+  nome_cliente: string;
+  empresa?: string;
+  email: string;
+  telefone: string;
+  origem: 'site' | 'indicacao' | 'evento' | 'cold_call' | 'linkedin';
+  status: 'novo' | 'contatado' | 'qualificado' | 'desqualificado';
+  tipo_servico: 'obra_civil' | 'manutencao_industrial' | 'consultoria';
+  valor_estimado?: number;
+  descricao_necessidade: string;
+  responsavel_comercial: string;
+  data_contato: string;
+  data_criacao: string;
+  observacoes?: string;
+  // Campos para conversão
+  convertido_oportunidade?: boolean;
+  id_oportunidade?: string;
+}
+
+export interface Cliente {
+  id: string;
+  nome: string;
+  tipo: 'pessoa_fisica' | 'pessoa_juridica';
+  cpf_cnpj: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+  segmento?: string; // Construtora, Indústria, etc.
+  // Histórico comercial
+  data_cadastro: string;
+  responsavel_comercial: string;
+  // Métricas
+  total_contratos: number;
+  valor_total_historico: number;
+  margem_media: number;
+  tempo_medio_pagamento: number;
+  status: 'ativo' | 'inativo' | 'inadimplente';
+}
+
+// Expandir Oportunidade existente
+export interface OportunidadeExpandida extends Oportunidade {
+  id_cliente: string;
+  nome_cliente: string;
+  empresa_cliente: string;
+  tipo_servico: 'obra_civil' | 'manutencao_industrial' | 'consultoria';
+  prazo_execucao_dias: number;
+  observacoes_comerciais?: string;
+  probabilidade_fechamento: number; // 0-100
+  data_prevista_fechamento: string;
+  // Vínculo com orçamento
+  tem_orcamento: boolean;
+  id_orcamento?: string;
+  aprovada_orcamento?: boolean;
+  // Histórico de ações comerciais
+  historico_acoes: AcaoComercial[];
+}
+
+export interface AcaoComercial {
+  id: string;
+  tipo: 'ligacao' | 'email' | 'reuniao' | 'proposta' | 'negociacao';
+  descricao: string;
+  data: string;
+  responsavel: string;
+  resultado?: string;
+  proxima_acao?: string;
+  data_proxima_acao?: string;
+}
+
+// Expandir Orçamento existente com integração
+export interface OrcamentoIntegrado extends Orcamento {
+  id_cliente: string;
+  nome_cliente: string;
+  nome_projeto: string;
+  endereco_execucao: string;
+  // Dados técnicos expandidos
+  prazo_execucao_dias: number;
+  inicio_previsto: string;
+  fim_previsto: string;
+  margem_lucro_prevista: number;
+  // Condições comerciais
+  forma_pagamento: string;
+  condicoes_especiais?: string;
+  validade_proposta: string;
+  // Aprovações
+  aprovado_comercial: boolean;
+  aprovado_tecnico: boolean;
+  data_aprovacao?: string;
+  // Integração com contrato
+  virou_contrato: boolean;
+  id_contrato?: string;
+}
+
+// Expandir Contrato existente
+export interface ContratoIntegrado extends Contrato {
+  id_cliente: string;
+  nome_cliente: string;
+  nome_projeto: string;
+  endereco_execucao: string;
+  // Execução e controle
+  hh_executado_total: number;
+  custo_executado_total: number;
+  margem_real_atual: number;
+  percentual_execucao: number;
+  // Faturamento
+  valor_faturado_total: number;
+  valor_pendente_faturamento: number;
+  // Datas importantes
+  data_inicio_real?: string;
+  data_fim_real?: string;
+  // Status financeiro
+  status_financeiro: 'em_dia' | 'atrasado' | 'inadimplente';
+}
+
+// Dashboard integrado
+export interface DashboardIntegrado {
+  // Métricas CRM
+  leads_ativos: number;
+  leads_mes: number;
+  taxa_conversao_lead_oportunidade: number;
+  // Pipeline comercial
+  oportunidades_ativas: number;
+  valor_pipeline_total: number;
+  valor_pipeline_mes: number;
+  probabilidade_media_fechamento: number;
+  // Orçamentos e contratos
+  orcamentos_pendentes: number;
+  valor_orcamentos_pendentes: number;
+  contratos_ativos: number;
+  valor_contratos_ativos: number;
+  // Execução e financeiro
+  obras_em_andamento: number;
+  margem_media_real: number;
+  desvio_orcamentario_medio: number;
+  valor_faturado_mes: number;
+  valor_a_faturar: number;
+  // Indicadores de performance
+  prazo_medio_aprovacao_orcamento: number;
+  tempo_medio_ciclo_comercial: number;
+  ticket_medio_contrato: number;
+}

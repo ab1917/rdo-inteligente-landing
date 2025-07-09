@@ -1,67 +1,55 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, TrendingUp, DollarSign, Clock, Plus } from "lucide-react";
+import { Users, TrendingUp, DollarSign, Clock, Plus, AlertTriangle, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCRMIntegration } from "@/hooks/useCRMIntegration";
+import { useFinanceiroIntegrado } from "@/hooks/useFinanceiroIntegrado";
 
 const CRMDashboard = () => {
+  const { dashboard, oportunidades, contratos, loading } = useCRMIntegration();
+  const { consolidado, getIndicadoresGlobais } = useFinanceiroIntegrado();
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-96">Carregando dados integrados...</div>;
+  }
+
+  const indicadores = getIndicadoresGlobais();
+
   const metrics = [
     {
       title: "Leads Ativos",
-      value: "23",
-      change: "+12%",
+      value: dashboard.leads_ativos.toString(),
+      change: `+${dashboard.leads_mes} este mês`,
       icon: Users,
       color: "text-blue-600"
     },
     {
       title: "Taxa Conversão",
-      value: "68%",
-      change: "+5%",
+      value: `${dashboard.taxa_conversao_lead_oportunidade.toFixed(1)}%`,
+      change: dashboard.taxa_conversao_lead_oportunidade > 60 ? "+Boa" : "Atenção",
       icon: TrendingUp,
       color: "text-green-600"
     },
     {
       title: "Pipeline Total",
-      value: "R$ 2.4M",
-      change: "+18%",
+      value: `R$ ${(dashboard.valor_pipeline_total / 1000000).toFixed(1)}M`,
+      change: `${dashboard.oportunidades_ativas} oportunidades`,
       icon: DollarSign,
       color: "text-primary"
     },
     {
-      title: "Ciclo Médio",
-      value: "42 dias",
-      change: "-3 dias",
-      icon: Clock,
-      color: "text-orange-600"
+      title: "Margem Atual",
+      value: `${consolidado.margem_total_atual.toFixed(1)}%`,
+      change: `${indicadores.contratos_criticos > 0 ? 'Atenção' : 'Saudável'}`,
+      icon: TrendingUp,
+      color: indicadores.contratos_criticos > 0 ? "text-orange-600" : "text-green-600"
     }
   ];
 
-  const recentOpportunities = [
-    {
-      id: 1,
-      cliente: "Construtora ABC",
-      valor: "R$ 450.000",
-      status: "Proposta",
-      responsavel: "João Silva",
-      prazo: "2024-01-15"
-    },
-    {
-      id: 2,
-      cliente: "Indústria XYZ",
-      valor: "R$ 280.000", 
-      status: "Negociação",
-      responsavel: "Maria Santos",
-      prazo: "2024-01-20"
-    },
-    {
-      id: 3,
-      cliente: "Fábrica 123",
-      valor: "R$ 180.000",
-      status: "Qualificado",
-      responsavel: "Pedro Costa",
-      prazo: "2024-01-25"
-    }
-  ];
+  const recentOpportunities = oportunidades
+    .sort((a, b) => new Date(b.data_criacao).getTime() - new Date(a.data_criacao).getTime())
+    .slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -112,11 +100,36 @@ const CRMDashboard = () => {
           <CardContent>
             <div className="space-y-4">
               {[
-                { etapa: "Lead", count: 15, valor: "R$ 890K", color: "bg-gray-500" },
-                { etapa: "Qualificado", count: 8, valor: "R$ 650K", color: "bg-blue-500" },
-                { etapa: "Proposta", count: 5, valor: "R$ 520K", color: "bg-yellow-500" },
-                { etapa: "Negociação", count: 3, valor: "R$ 380K", color: "bg-orange-500" },
-                { etapa: "Fechado", count: 2, valor: "R$ 280K", color: "bg-green-500" }
+                { 
+                  etapa: "Leads", 
+                  count: dashboard.leads_ativos, 
+                  valor: `R$ ${(dashboard.valor_pipeline_total * 0.2 / 1000).toFixed(0)}K`, 
+                  color: "bg-gray-500" 
+                },
+                { 
+                  etapa: "Qualificados", 
+                  count: oportunidades.filter(o => o.status === 'negociacao').length, 
+                  valor: `R$ ${(oportunidades.filter(o => o.status === 'negociacao').reduce((sum, o) => sum + o.valor_estimado, 0) / 1000).toFixed(0)}K`, 
+                  color: "bg-blue-500" 
+                },
+                { 
+                  etapa: "Proposta", 
+                  count: oportunidades.filter(o => o.status === 'proposta_enviada').length, 
+                  valor: `R$ ${(oportunidades.filter(o => o.status === 'proposta_enviada').reduce((sum, o) => sum + o.valor_estimado, 0) / 1000).toFixed(0)}K`, 
+                  color: "bg-yellow-500" 
+                },
+                { 
+                  etapa: "Negociação", 
+                  count: oportunidades.filter(o => o.status === 'negociacao').length, 
+                  valor: `R$ ${(oportunidades.filter(o => o.status === 'negociacao').reduce((sum, o) => sum + o.valor_estimado, 0) / 1000).toFixed(0)}K`, 
+                  color: "bg-orange-500" 
+                },
+                { 
+                  etapa: "Aprovados", 
+                  count: contratos.filter(c => c.status === 'ativo').length, 
+                  valor: `R$ ${(consolidado.valor_total_contratos / 1000000).toFixed(1)}M`, 
+                  color: "bg-green-500" 
+                }
               ].map((item) => (
                 <div key={item.etapa} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -147,17 +160,103 @@ const CRMDashboard = () => {
               {recentOpportunities.map((opp) => (
                 <div key={opp.id} className="flex items-center justify-between border-b pb-2 last:border-b-0">
                   <div>
-                    <p className="font-medium">{opp.cliente}</p>
-                    <p className="text-sm text-muted-foreground">{opp.responsavel}</p>
+                    <p className="font-medium">{opp.empresa_cliente}</p>
+                    <p className="text-sm text-muted-foreground">{opp.responsavel_comercial}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">{opp.valor}</p>
+                    <p className="font-medium">R$ {(opp.valor_estimado / 1000).toFixed(0)}K</p>
                     <Badge variant="outline" className="text-xs">
-                      {opp.status}
+                      {opp.status === 'proposta_enviada' ? 'Proposta' : 
+                       opp.status === 'negociacao' ? 'Negociação' :
+                       opp.status === 'aprovada' ? 'Aprovada' : opp.status}
                     </Badge>
                   </div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Indicadores Financeiros */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Situação Financeira
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span>Contratos Saudáveis</span>
+                <Badge variant="outline" className="text-green-600">
+                  {indicadores.contratos_no_verde}
+                </Badge>
+              </div>
+              <div className="flex justify-between">
+                <span>Requer Atenção</span>
+                <Badge variant="outline" className="text-yellow-600">
+                  {indicadores.contratos_atencao}
+                </Badge>
+              </div>
+              <div className="flex justify-between">
+                <span>Críticos</span>
+                <Badge variant="outline" className="text-red-600">
+                  {indicadores.contratos_criticos}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-primary" />
+              Faturamento
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm text-muted-foreground">Já Faturado</p>
+                <p className="text-2xl font-bold">R$ {(consolidado.valor_total_faturado / 1000000).toFixed(1)}M</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">A Faturar</p>
+                <p className="text-xl font-semibold text-green-600">R$ {(consolidado.valor_total_a_faturar / 1000000).toFixed(1)}M</p>
+              </div>
+              <div className="pt-2 border-t">
+                <p className="text-sm text-muted-foreground">% Faturado</p>
+                <p className="text-lg font-medium">{indicadores.percentual_faturado.toFixed(1)}%</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm text-muted-foreground">Margem Média</p>
+                <p className="text-2xl font-bold">{consolidado.margem_total_atual.toFixed(1)}%</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Ticket Médio</p>
+                <p className="text-xl font-semibold">R$ {(dashboard.ticket_medio_contrato / 1000000).toFixed(1)}M</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Ciclo Comercial</p>
+                <p className="text-lg font-medium">{dashboard.tempo_medio_ciclo_comercial} dias</p>
+              </div>
             </div>
           </CardContent>
         </Card>

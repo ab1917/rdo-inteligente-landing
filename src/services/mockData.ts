@@ -1,4 +1,4 @@
-import type { RDO, DashboardMetrics, User, Funcionario, Equipe, Obra, Certificacao, EquipamentoMaster, Equipamento } from '@/types';
+import type { RDO, DashboardMetrics, User, Funcionario, Equipe, Obra, Certificacao, EquipamentoMaster, Equipamento, Lead, Cliente, OportunidadeExpandida, OrcamentoIntegrado, ContratoIntegrado, DashboardIntegrado } from '@/types';
 
 // Mock equipamentos para indústria
 export const mockEquipamentosIndustriais: Equipamento[] = [
@@ -685,6 +685,422 @@ export const setStorageData = <T>(key: string, data: T): void => {
 };
 
 // Initialize default data if not exists
+// Dados CRM Integrados
+export const mockClientes: Cliente[] = [
+  {
+    id: '1',
+    nome: 'Construtora Alpha Ltda',
+    tipo: 'pessoa_juridica',
+    cpf_cnpj: '12.345.678/0001-90',
+    email: 'contato@alpha.com.br',
+    telefone: '(11) 3333-4444',
+    endereco: 'Av. Paulista, 1000 - Sala 200',
+    cidade: 'São Paulo',
+    estado: 'SP',
+    cep: '01310-100',
+    segmento: 'Construtora',
+    data_cadastro: '2023-01-15',
+    responsavel_comercial: 'João Comercial',
+    total_contratos: 3,
+    valor_total_historico: 4200000,
+    margem_media: 18.5,
+    tempo_medio_pagamento: 35,
+    status: 'ativo'
+  },
+  {
+    id: '2', 
+    nome: 'Grupo Beta S.A.',
+    tipo: 'pessoa_juridica',
+    cpf_cnpj: '98.765.432/0001-10',
+    email: 'projetos@grupobeta.com.br',
+    telefone: '(11) 5555-6666',
+    endereco: 'Rua Augusta, 500 - 10º andar',
+    cidade: 'São Paulo',
+    estado: 'SP',
+    cep: '01305-000',
+    segmento: 'Incorporadora',
+    data_cadastro: '2023-02-01',
+    responsavel_comercial: 'Maria Comercial',
+    total_contratos: 2,
+    valor_total_historico: 12300000,
+    margem_media: 22.3,
+    tempo_medio_pagamento: 28,
+    status: 'ativo'
+  },
+  {
+    id: '3',
+    nome: 'Cimento Forte S.A.',
+    tipo: 'pessoa_juridica', 
+    cpf_cnpj: '55.666.777/0001-88',
+    email: 'manutencao@cimentoforte.com.br',
+    telefone: '(11) 7777-8888',
+    endereco: 'Distrito Industrial, 100',
+    cidade: 'Guarulhos',
+    estado: 'SP',
+    cep: '07140-000',
+    segmento: 'Indústria',
+    data_cadastro: '2022-11-10',
+    responsavel_comercial: 'Carlos Comercial',
+    total_contratos: 5,
+    valor_total_historico: 8500000,
+    margem_media: 25.8,
+    tempo_medio_pagamento: 45,
+    status: 'ativo'
+  }
+];
+
+export const mockLeads: Lead[] = [
+  {
+    id: '1',
+    nome_cliente: 'Industrial Nova Era',
+    empresa: 'Nova Era Ltda',
+    email: 'contato@novaera.com.br',
+    telefone: '(11) 9999-0000',
+    origem: 'site',
+    status: 'qualificado',
+    tipo_servico: 'manutencao_industrial',
+    valor_estimado: 350000,
+    descricao_necessidade: 'Manutenção preventiva em linha de produção',
+    responsavel_comercial: 'João Comercial',
+    data_contato: '2024-01-15',
+    data_criacao: '2024-01-10',
+    convertido_oportunidade: true,
+    id_oportunidade: '4'
+  },
+  {
+    id: '2',
+    nome_cliente: 'Construtora Horizonte',
+    empresa: 'Horizonte Construções',
+    email: 'vendas@horizonte.com.br', 
+    telefone: '(11) 8888-1111',
+    origem: 'indicacao',
+    status: 'contatado',
+    tipo_servico: 'obra_civil',
+    valor_estimado: 850000,
+    descricao_necessidade: 'Construção de edifício residencial 15 andares',
+    responsavel_comercial: 'Maria Comercial',
+    data_contato: '2024-01-12',
+    data_criacao: '2024-01-08',
+    convertido_oportunidade: false
+  },
+  {
+    id: '3',
+    nome_cliente: 'Metalúrgica Sul',
+    empresa: 'Sul Metais S.A.',
+    email: 'projetos@sulmetais.com.br',
+    telefone: '(11) 7777-2222',
+    origem: 'linkedin',
+    status: 'novo',
+    tipo_servico: 'manutencao_industrial',
+    valor_estimado: 180000,
+    descricao_necessidade: 'Instalação de sistema de automação',
+    responsavel_comercial: 'Carlos Comercial',
+    data_contato: '2024-01-18',
+    data_criacao: '2024-01-18'
+  }
+];
+
+export const mockOportunidades: OportunidadeExpandida[] = [
+  {
+    id: '1',
+    id_lead: '1',
+    id_cliente: '1',
+    nome_cliente: 'Construtora Alpha',
+    empresa_cliente: 'Construtora Alpha Ltda',
+    tipo_servico: 'obra_civil',
+    descricao_escopo: 'Construção de edifício residencial 20 andares com 80 apartamentos',
+    valor_estimado: 2500000,
+    status: 'aprovada',
+    responsavel_comercial: 'João Comercial',
+    data_criacao: '2023-12-01',
+    prazo_execucao_dias: 365,
+    probabilidade_fechamento: 95,
+    data_prevista_fechamento: '2024-01-15',
+    tem_orcamento: true,
+    id_orcamento: '1',
+    aprovada_orcamento: true,
+    historico_acoes: [
+      {
+        id: '1',
+        tipo: 'reuniao',
+        descricao: 'Reunião inicial para levantamento de requisitos',
+        data: '2023-12-01',
+        responsavel: 'João Comercial',
+        resultado: 'Aprovação do escopo inicial'
+      }
+    ]
+  },
+  {
+    id: '2',
+    id_lead: '2', 
+    id_cliente: '2',
+    nome_cliente: 'Grupo Beta',
+    empresa_cliente: 'Grupo Beta S.A.',
+    tipo_servico: 'obra_civil',
+    descricao_escopo: 'Shopping Center com 150 lojas e cinema',
+    valor_estimado: 8500000,
+    status: 'aprovada',
+    responsavel_comercial: 'Maria Comercial',
+    data_criacao: '2023-11-15',
+    prazo_execucao_dias: 730,
+    probabilidade_fechamento: 90,
+    data_prevista_fechamento: '2024-02-01',
+    tem_orcamento: true,
+    id_orcamento: '2',
+    aprovada_orcamento: true,
+    historico_acoes: []
+  },
+  {
+    id: '3',
+    id_lead: '3',
+    id_cliente: '3', 
+    nome_cliente: 'Cimento Forte',
+    empresa_cliente: 'Cimento Forte S.A.',
+    tipo_servico: 'manutencao_industrial',
+    descricao_escopo: 'Manutenção completa linha de produção cimento',
+    valor_estimado: 5000000,
+    status: 'aprovada',
+    responsavel_comercial: 'Carlos Comercial',
+    data_criacao: '2023-12-15',
+    prazo_execucao_dias: 180,
+    probabilidade_fechamento: 88,
+    data_prevista_fechamento: '2024-01-01',
+    tem_orcamento: true,
+    id_orcamento: '3',
+    aprovada_orcamento: true,
+    historico_acoes: []
+  },
+  {
+    id: '4',
+    id_lead: '1',
+    id_cliente: '1',
+    nome_cliente: 'Industrial Nova Era',
+    empresa_cliente: 'Nova Era Ltda',
+    tipo_servico: 'manutencao_industrial',
+    descricao_escopo: 'Manutenção preventiva equipamentos industriais',
+    valor_estimado: 350000,
+    status: 'proposta_enviada',
+    responsavel_comercial: 'João Comercial',
+    data_criacao: '2024-01-15',
+    prazo_execucao_dias: 60,
+    probabilidade_fechamento: 75,
+    data_prevista_fechamento: '2024-02-15',
+    tem_orcamento: true,
+    id_orcamento: '4',
+    aprovada_orcamento: false,
+    historico_acoes: []
+  }
+];
+
+export const mockOrcamentos: OrcamentoIntegrado[] = [
+  {
+    id: '1',
+    id_oportunidade: '1',
+    id_cliente: '1',
+    nome_cliente: 'Construtora Alpha',
+    nome_projeto: 'Edifício Residencial Sunset',
+    endereco_execucao: 'Rua das Flores, 123 - Bairro Jardim',
+    tipo: 'obra_civil',
+    composicoes: [
+      {
+        id: '1',
+        id_orcamento: '1',
+        descricao: 'Fundação e estrutura',
+        quantidade: 1200,
+        valor_unitario: 850,
+        tipo: 'hh',
+        hh_unitario: 1.2,
+        valor_hh: 45
+      }
+    ],
+    hh_previsto_total: 1440,
+    valor_hh_medio: 45,
+    valor_total: 2500000,
+    status: 'aprovado',
+    data_criacao: '2023-12-05',
+    prazo_execucao_dias: 365,
+    inicio_previsto: '2024-01-15',
+    fim_previsto: '2025-01-15',
+    margem_lucro_prevista: 18.5,
+    forma_pagamento: '30% entrada, 70% conforme medição',
+    validade_proposta: '2024-01-31',
+    aprovado_comercial: true,
+    aprovado_tecnico: true,
+    data_aprovacao: '2024-01-10',
+    virou_contrato: true,
+    id_contrato: '1'
+  },
+  {
+    id: '2',
+    id_oportunidade: '2',
+    id_cliente: '2',
+    nome_cliente: 'Grupo Beta',
+    nome_projeto: 'Shopping Center Plaza',
+    endereco_execucao: 'Av. Principal, 456 - Centro',
+    tipo: 'obra_civil',
+    composicoes: [],
+    hh_previsto_total: 5000,
+    valor_hh_medio: 48,
+    valor_total: 8500000,
+    status: 'aprovado',
+    data_criacao: '2023-11-20',
+    prazo_execucao_dias: 730,
+    inicio_previsto: '2024-02-01',
+    fim_previsto: '2026-02-01',
+    margem_lucro_prevista: 22.3,
+    forma_pagamento: '20% entrada, 80% conforme cronograma',
+    validade_proposta: '2024-02-15',
+    aprovado_comercial: true,
+    aprovado_tecnico: true,
+    data_aprovacao: '2024-01-25',
+    virou_contrato: true,
+    id_contrato: '2'
+  },
+  {
+    id: '3',
+    id_oportunidade: '3',
+    id_cliente: '3',
+    nome_cliente: 'Cimento Forte',
+    nome_projeto: 'Manutenção Linha Produção',
+    endereco_execucao: 'Distrito Industrial - Zona Norte',
+    tipo: 'manutencao_industrial',
+    composicoes: [],
+    hh_previsto_total: 2500,
+    valor_hh_medio: 65,
+    valor_total: 5000000,
+    status: 'aprovado',
+    data_criacao: '2023-12-20',
+    prazo_execucao_dias: 180,
+    inicio_previsto: '2024-01-01',
+    fim_previsto: '2024-06-30',
+    margem_lucro_prevista: 25.8,
+    forma_pagamento: 'Mensal conforme execução',
+    validade_proposta: '2024-01-15',
+    aprovado_comercial: true,
+    aprovado_tecnico: true,
+    data_aprovacao: '2023-12-28',
+    virou_contrato: true,
+    id_contrato: '3'
+  },
+  {
+    id: '4',
+    id_oportunidade: '4',
+    id_cliente: '1',
+    nome_cliente: 'Industrial Nova Era',
+    nome_projeto: 'Manutenção Preventiva Equipamentos',
+    endereco_execucao: 'Zona Industrial Nova Era',
+    tipo: 'manutencao_industrial',
+    composicoes: [],
+    hh_previsto_total: 800,
+    valor_hh_medio: 55,
+    valor_total: 350000,
+    status: 'enviado',
+    data_criacao: '2024-01-18',
+    prazo_execucao_dias: 60,
+    inicio_previsto: '2024-02-15',
+    fim_previsto: '2024-04-15',
+    margem_lucro_prevista: 20.0,
+    forma_pagamento: '50% entrada, 50% final',
+    validade_proposta: '2024-02-28',
+    aprovado_comercial: false,
+    aprovado_tecnico: true,
+    virou_contrato: false
+  }
+];
+
+export const mockContratos: ContratoIntegrado[] = [
+  {
+    id: '1',
+    id_orcamento: '1',
+    id_cliente: '1',
+    nome_cliente: 'Construtora Alpha',
+    nome_projeto: 'Edifício Residencial Sunset',
+    endereco_execucao: 'Rua das Flores, 123 - Bairro Jardim',
+    data_assinatura: '2024-01-15',
+    prazo_execucao: 365,
+    valor_fechado: 2500000,
+    tipo_execucao: 'escopo',
+    status: 'ativo',
+    hh_executado_total: 160,
+    custo_executado_total: 75000,
+    margem_real_atual: 17.2,
+    percentual_execucao: 15.5,
+    valor_faturado_total: 375000,
+    valor_pendente_faturamento: 125000,
+    data_inicio_real: '2024-01-15',
+    status_financeiro: 'em_dia'
+  },
+  {
+    id: '2',
+    id_orcamento: '2',
+    id_cliente: '2',
+    nome_cliente: 'Grupo Beta',
+    nome_projeto: 'Shopping Center Plaza',
+    endereco_execucao: 'Av. Principal, 456 - Centro',
+    data_assinatura: '2024-02-01',
+    prazo_execucao: 730,
+    valor_fechado: 8500000,
+    tipo_execucao: 'escopo',
+    status: 'ativo',
+    hh_executado_total: 80,
+    custo_executado_total: 33600,
+    margem_real_atual: 21.8,
+    percentual_execucao: 2.5,
+    valor_faturado_total: 170000,
+    valor_pendente_faturamento: 425000,
+    data_inicio_real: '2024-02-01',
+    status_financeiro: 'em_dia'
+  },
+  {
+    id: '3',
+    id_orcamento: '3',
+    id_cliente: '3',
+    nome_cliente: 'Cimento Forte',
+    nome_projeto: 'Manutenção Linha Produção',
+    endereco_execucao: 'Distrito Industrial - Zona Norte',
+    data_assinatura: '2024-01-01',
+    prazo_execucao: 180,
+    valor_fechado: 5000000,
+    tipo_execucao: 'por_hh',
+    status: 'ativo',
+    hh_executado_total: 240,
+    custo_executado_total: 100000,
+    margem_real_atual: 24.2,
+    percentual_execucao: 12.8,
+    valor_faturado_total: 640000,
+    valor_pendente_faturamento: 250000,
+    data_inicio_real: '2024-01-01',
+    status_financeiro: 'em_dia'
+  }
+];
+
+export const mockDashboardIntegrado: DashboardIntegrado = {
+  // Métricas CRM
+  leads_ativos: 3,
+  leads_mes: 12,
+  taxa_conversao_lead_oportunidade: 68.5,
+  // Pipeline comercial
+  oportunidades_ativas: 4,
+  valor_pipeline_total: 16350000,
+  valor_pipeline_mes: 2400000,
+  probabilidade_media_fechamento: 87.0,
+  // Orçamentos e contratos
+  orcamentos_pendentes: 1,
+  valor_orcamentos_pendentes: 350000,
+  contratos_ativos: 3,
+  valor_contratos_ativos: 16000000,
+  // Execução e financeiro
+  obras_em_andamento: 3,
+  margem_media_real: 21.1,
+  desvio_orcamentario_medio: -2.3,
+  valor_faturado_mes: 485000,
+  valor_a_faturar: 800000,
+  // Indicadores de performance
+  prazo_medio_aprovacao_orcamento: 8,
+  tempo_medio_ciclo_comercial: 42,
+  ticket_medio_contrato: 5333333
+};
+
 export const initializeData = () => {
   if (!localStorage.getItem('rdos')) {
     setStorageData('rdos', mockRDOs);
@@ -700,5 +1116,20 @@ export const initializeData = () => {
   }
   if (!localStorage.getItem('obras')) {
     setStorageData('obras', mockObras);
+  }
+  if (!localStorage.getItem('clientes')) {
+    setStorageData('clientes', mockClientes);
+  }
+  if (!localStorage.getItem('leads')) {
+    setStorageData('leads', mockLeads);
+  }
+  if (!localStorage.getItem('oportunidades')) {
+    setStorageData('oportunidades', mockOportunidades);
+  }
+  if (!localStorage.getItem('orcamentos')) {
+    setStorageData('orcamentos', mockOrcamentos);
+  }
+  if (!localStorage.getItem('contratos')) {
+    setStorageData('contratos', mockContratos);
   }
 };
