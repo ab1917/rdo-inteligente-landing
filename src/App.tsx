@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import { Login } from "./pages/auth/Login";
 import { Register } from "./pages/auth/Register";
 import { Dashboard } from "./pages/Dashboard";
+import { RDOList, CreateRDO } from "./pages/rdo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,22 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <Dashboard />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/rdo" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <RDOList />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/rdo/criar" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <CreateRDO />
                 </AppLayout>
               </ProtectedRoute>
             } />
