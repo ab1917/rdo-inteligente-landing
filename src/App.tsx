@@ -15,6 +15,7 @@ import { BudgetList } from "./pages/budgets";
 import { EquipeList, FuncionarioList, EquipamentoList } from "./pages/equipes";
 import { CRMDashboard, LeadsList, OportunidadesList, ClientesList } from "./pages/crm";
 import { CronogramaList } from "./pages/cronograma";
+import { BoletimList, CreateBoletim, BoletimDetail } from "./pages/boletim";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -124,6 +125,30 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <CronogramaList />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/boletim" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <BoletimList />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/boletim/criar" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <CreateBoletim />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/boletim/:id" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <BoletimDetail />
                 </AppLayout>
               </ProtectedRoute>
             } />

@@ -70,6 +70,12 @@ const menuItems = [
     group: 'gestao'
   },
   {
+    title: 'Boletim de Medição',
+    url: '/boletim',
+    icon: FileText,
+    group: 'obras'
+  },
+  {
     title: 'CRM',
     url: '/crm',
     icon: Building2,

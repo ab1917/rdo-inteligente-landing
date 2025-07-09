@@ -315,8 +315,12 @@ export interface Activity {
 // Boletim de Medição
 export interface BoletimMedicao {
   id: string;
-  rdo_id: string;
-  data: string;
+  rdo_id: string; // IDs dos RDOs (separados por vírgula se consolidado)
+  obra_nome?: string; // Nome da obra
+  data_inicio?: string; // Data de início (para boletins de período)
+  data_fim?: string; // Data de fim (para boletins de período)
+  periodo_dias?: number; // Quantidade de dias do período
+  data: string; // Data de referência
   funcionarios: FuncionarioBoletim[];
   equipamentos: EquipamentoBoletim[];
   materiais: MaterialBoletim[];
