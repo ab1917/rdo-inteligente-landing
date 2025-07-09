@@ -544,3 +544,36 @@ export interface DashboardIntegrado {
   tempo_medio_ciclo_comercial: number;
   ticket_medio_contrato: number;
 }
+
+// Integrações CRM Financeiro
+export interface AnaliseFinanceira {
+  contrato_id: string;
+  nome_projeto: string;
+  valor_contrato: number;
+  custo_executado: number;
+  margem_atual: number;
+  margem_prevista: number;
+  desvio_margem: number;
+  percentual_execucao: number;
+  valor_faturado: number;
+  valor_a_faturar: number;
+  projecao_resultado_final: number;
+  status_financeiro: 'positivo' | 'atencao' | 'critico';
+}
+
+export interface ConsolidadoFinanceiro {
+  total_contratos_ativos: number;
+  valor_total_contratos: number;
+  custo_total_executado: number;
+  margem_total_atual: number;
+  valor_total_faturado: number;
+  valor_total_a_faturar: number;
+  analises_por_contrato: AnaliseFinanceira[];
+  resumo_por_cliente: {
+    cliente_id: string;
+    nome_cliente: string;
+    valor_total: number;
+    margem_media: number;
+    contratos_ativos: number;
+  }[];
+}
