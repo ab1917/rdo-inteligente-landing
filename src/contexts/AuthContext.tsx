@@ -6,6 +6,11 @@ interface User {
   email: string;
   role: 'admin' | 'engineer' | 'manager';
   company: string;
+  companyInfo?: {
+    cnpj: string;
+    address: string;
+    phone: string;
+  };
 }
 
 interface AuthContextType {
@@ -23,6 +28,46 @@ interface RegisterData {
   company: string;
   role: 'admin' | 'engineer' | 'manager';
 }
+
+// Demo users for testing
+const DEMO_USERS: User[] = [
+  {
+    id: '1',
+    name: 'Ricardo Mendes',
+    email: 'admin@construtorademo.com.br',
+    role: 'admin',
+    company: 'Construtora Demo Ltda',
+    companyInfo: {
+      cnpj: '12.345.678/0001-90',
+      address: 'Av. das Construções, 1000 - São Paulo/SP',
+      phone: '(11) 3456-7890'
+    }
+  },
+  {
+    id: '2',
+    name: 'João Silva',
+    email: 'engenheiro@construtorademo.com.br',
+    role: 'engineer',
+    company: 'Construtora Demo Ltda',
+    companyInfo: {
+      cnpj: '12.345.678/0001-90',
+      address: 'Av. das Construções, 1000 - São Paulo/SP',
+      phone: '(11) 3456-7890'
+    }
+  },
+  {
+    id: '3',
+    name: 'Maria Santos',
+    email: 'gestor@construtorademo.com.br',
+    role: 'manager',
+    company: 'Construtora Demo Ltda',
+    companyInfo: {
+      cnpj: '12.345.678/0001-90',
+      address: 'Av. das Construções, 1000 - São Paulo/SP',
+      phone: '(11) 3456-7890'
+    }
+  }
+];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -53,9 +98,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Mock authentication - accept any email/password for demo
+    // Check if it's a demo user
+    const demoUser = DEMO_USERS.find(user => user.email === email);
+    
+    if (demoUser && password === '123456') {
+      // Demo user login
+      setUser(demoUser);
+      localStorage.setItem('rdo-user', JSON.stringify(demoUser));
+      setIsLoading(false);
+      return true;
+    }
+    
+    // Fallback for any other email/password (backward compatibility)
     const mockUser: User = {
-      id: '1',
+      id: Date.now().toString(),
       name: email.split('@')[0],
       email,
       role: email.includes('admin') ? 'admin' : 'engineer',
