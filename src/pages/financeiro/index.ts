@@ -1,0 +1,1 @@
+export { FinanceiroDashboard } from './FinanceiroDashboard';

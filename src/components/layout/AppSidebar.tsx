@@ -82,6 +82,12 @@ const menuItems = [
     group: 'gestao'
   },
   {
+    title: 'Financeiro',
+    url: '/financeiro',
+    icon: BarChart3,
+    group: 'gestao'
+  },
+  {
     title: 'Relatórios',
     url: '/relatorios',
     icon: BarChart3,

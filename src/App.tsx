@@ -16,6 +16,7 @@ import { EquipeList, FuncionarioList, EquipamentoList } from "./pages/equipes";
 import { CRMDashboard, LeadsList, OportunidadesList, ClientesList } from "./pages/crm";
 import { CronogramaList } from "./pages/cronograma";
 import { BoletimList, CreateBoletim, BoletimDetail } from "./pages/boletim";
+import { FinanceiroDashboard } from "./pages/financeiro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -149,6 +150,14 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <BoletimDetail />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/financeiro" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <FinanceiroDashboard />
                 </AppLayout>
               </ProtectedRoute>
             } />
