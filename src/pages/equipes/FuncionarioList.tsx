@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -14,6 +14,8 @@ import { FuncionarioFilters } from '@/components/funcionario/FuncionarioFilters'
 import { FuncionarioCard } from '@/components/funcionario/FuncionarioCard';
 import { FuncionarioTableRow } from '@/components/funcionario/FuncionarioTableRow';
 import { FuncionarioEmptyState } from '@/components/funcionario/FuncionarioEmptyState';
+import { CreateFuncionarioDialog } from '@/components/funcionario/CreateFuncionarioDialog';
+import { FuncionarioImport } from '@/components/funcionario/FuncionarioImport';
 import { getStatusColor, formatSalary } from '@/utils/funcionarioHelpers';
 import type { Funcionario } from '@/types';
 
@@ -21,6 +23,8 @@ export function FuncionarioList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'ativo' | 'inativo'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   const filteredFuncionarios = funcionariosData.filter(funcionario => {
     const matchesSearch = funcionario.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,7 +49,11 @@ export function FuncionarioList() {
           <Button variant="outline" onClick={() => setViewMode(viewMode === 'grid' ? 'table' : 'grid')}>
             {viewMode === 'grid' ? 'Visão Tabela' : 'Visão Cards'}
           </Button>
-          <Button>
+          <Button variant="outline" onClick={() => setShowImportDialog(true)}>
+            <Upload className="mr-2 h-4 w-4" />
+            Importar
+          </Button>
+          <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Novo Funcionário
           </Button>
@@ -104,6 +112,20 @@ export function FuncionarioList() {
           searchTerm={searchTerm}
           statusFilter={statusFilter}
         />
+      )}
+
+      {/* Dialogs */}
+      <CreateFuncionarioDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
+
+      {showImportDialog && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background border rounded-lg shadow-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
+            <FuncionarioImport onClose={() => setShowImportDialog(false)} />
+          </div>
+        </div>
       )}
     </div>
   );
