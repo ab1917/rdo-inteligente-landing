@@ -10,7 +10,8 @@ import {
   Settings,
   Building2,
   HardHat,
-  Truck
+  Truck,
+  DollarSign
 } from 'lucide-react';
 import {
   Sidebar,
@@ -84,7 +85,7 @@ const menuItems = [
   {
     title: 'Financeiro',
     url: '/financeiro',
-    icon: BarChart3,
+    icon: DollarSign,
     group: 'gestao'
   },
   {
