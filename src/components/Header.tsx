@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building, Menu, X, ArrowRight } from "lucide-react";
 
@@ -38,12 +39,14 @@ export function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" className="font-medium">
-              Entrar
+            <Button variant="ghost" className="font-medium" asChild>
+              <Link to="/login">Entrar</Link>
             </Button>
-            <Button variant="default" className="font-semibold">
-              Demo Gratuita
-              <ArrowRight className="ml-2 h-4 w-4" />
+            <Button variant="default" className="font-semibold" asChild>
+              <Link to="/register">
+                Demo Gratuita
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
           </div>
 
@@ -76,12 +79,14 @@ export function Header() {
                 </a>
               ))}
               <div className="px-4 pt-4 space-y-3">
-                <Button variant="ghost" className="w-full font-medium">
-                  Entrar
+                <Button variant="ghost" className="w-full font-medium" asChild>
+                  <Link to="/login">Entrar</Link>
                 </Button>
-                <Button variant="default" className="w-full font-semibold">
-                  Demo Gratuita
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button variant="default" className="w-full font-semibold" asChild>
+                  <Link to="/register">
+                    Demo Gratuita
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
               </div>
             </nav>
