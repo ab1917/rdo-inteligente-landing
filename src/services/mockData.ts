@@ -112,7 +112,12 @@ export const funcionariosData: Funcionario[] = [
         orgao_emissor: 'SENAI',
         numero: 'NR35-2023-001',
         data_emissao: '2023-01-10',
-        data_vencimento: '2025-01-10'
+        data_vencimento: '2025-01-10',
+        tipo: 'treinamento',
+        categoria: 'nr',
+        status: 'valida',
+        carga_horaria: 8,
+        instrutor: 'José Silva'
       }
     ]
   },
@@ -135,7 +140,12 @@ export const funcionariosData: Funcionario[] = [
         orgao_emissor: 'SENAI',
         numero: 'NR10-2023-045',
         data_emissao: '2023-02-15',
-        data_vencimento: '2025-02-15'
+        data_vencimento: '2025-02-15',
+        tipo: 'treinamento',
+        categoria: 'nr',
+        status: 'valida',
+        carga_horaria: 40,
+        instrutor: 'Carlos Eletricista'
       },
       {
         id: '3',
@@ -143,7 +153,12 @@ export const funcionariosData: Funcionario[] = [
         orgao_emissor: 'SENAI',
         numero: 'NR35-2023-067',
         data_emissao: '2023-02-20',
-        data_vencimento: '2025-02-20'
+        data_vencimento: '2025-02-20',
+        tipo: 'treinamento',
+        categoria: 'nr',
+        status: 'valida',
+        carga_horaria: 8,
+        instrutor: 'Ana Segurança'
       }
     ]
   },
@@ -166,7 +181,12 @@ export const funcionariosData: Funcionario[] = [
         orgao_emissor: 'SENAI',
         numero: 'NR18-2022-123',
         data_emissao: '2022-10-15',
-        data_vencimento: '2024-10-15'
+        data_vencimento: '2024-10-15',
+        tipo: 'treinamento',
+        categoria: 'nr',
+        status: 'proximo_vencimento',
+        carga_horaria: 16,
+        instrutor: 'Pedro Segurança'
       }
     ]
   },
@@ -189,7 +209,13 @@ export const funcionariosData: Funcionario[] = [
         orgao_emissor: 'SENAI',
         numero: 'NR12-2023-089',
         data_emissao: '2023-05-20',
-        data_vencimento: '2025-05-20'
+        data_vencimento: '2025-05-20',
+        tipo: 'treinamento',
+        categoria: 'nr',
+        status: 'valida',
+        carga_horaria: 20,
+        instrutor: 'Roberto Técnico',
+        local_treinamento: 'SENAI - Unidade Industrial'
       }
     ]
   },
@@ -224,7 +250,10 @@ export const funcionariosData: Funcionario[] = [
         nome: 'Registro CREA',
         orgao_emissor: 'CREA-SP',
         numero: 'CREA-123456',
-        data_emissao: '2020-01-15'
+        data_emissao: '2020-01-15',
+        tipo: 'certificacao',
+        categoria: 'crea',
+        status: 'valida'
       }
     ]
   }

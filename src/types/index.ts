@@ -180,6 +180,22 @@ export interface Certificacao {
   data_emissao: string;
   data_vencimento?: string;
   arquivo_certificado?: string;
+  // Campos expandidos para treinamentos
+  tipo: 'certificacao' | 'treinamento' | 'curso';
+  categoria: 'nr' | 'crea' | 'tecnico' | 'operacional' | 'seguranca' | 'qualidade';
+  status: 'valida' | 'vencida' | 'proximo_vencimento' | 'pendente_renovacao';
+  carga_horaria?: number;
+  instrutor?: string;
+  local_treinamento?: string;
+  observacoes?: string;
+  renovacoes?: HistoricoRenovacao[];
+}
+
+export interface HistoricoRenovacao {
+  id: string;
+  data_renovacao: string;
+  nova_validade: string;
+  observacoes?: string;
 }
 
 export interface EquipamentoMaster {

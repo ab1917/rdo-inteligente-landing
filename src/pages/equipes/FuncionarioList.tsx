@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { CertificacaoStatus } from '@/components/funcionario/CertificacaoStatus';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -166,26 +167,14 @@ export function FuncionarioList() {
                   </div>
                 </div>
 
-                {funcionario.certificacoes && funcionario.certificacoes.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">
-                      Certificações
-                    </p>
-                    <div className="space-y-1">
-                      {funcionario.certificacoes.slice(0, 2).map((cert) => (
-                        <div key={cert.id} className="flex items-center gap-2">
-                          <Award className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs">{cert.nome}</span>
-                        </div>
-                      ))}
-                      {funcionario.certificacoes.length > 2 && (
-                        <p className="text-xs text-muted-foreground">
-                          +{funcionario.certificacoes.length - 2} mais
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">
+                    Certificações
+                  </p>
+                  <CertificacaoStatus 
+                    certificacoes={funcionario.certificacoes || []} 
+                  />
+                </div>
 
                 <div className="pt-2 border-t">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -205,6 +194,7 @@ export function FuncionarioList() {
                 <TableHead>Funcionário</TableHead>
                 <TableHead>Cargo</TableHead>
                 <TableHead>Especialidades</TableHead>
+                <TableHead>Certificações</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Salário</TableHead>
                 <TableHead>Admissão</TableHead>
@@ -241,6 +231,12 @@ export function FuncionarioList() {
                         </span>
                       )}
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <CertificacaoStatus 
+                      certificacoes={funcionario.certificacoes || []} 
+                      compact 
+                    />
                   </TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(funcionario.status)}>
