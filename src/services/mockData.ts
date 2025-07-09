@@ -1,11 +1,37 @@
 import { RDO, Funcionario, Obra, DashboardMetrics, Equipamento } from '@/types';
 
-// Mock equipamentos disponíveis
+// Mock equipamentos para indústria
+export const mockEquipamentosIndustriais: Equipamento[] = [
+  {
+    id: '4',
+    nome: 'Multímetro Fluke 87V',
+    tipo: 'medicao',
+    categoria: 'industrial',
+    horaInicio: '08:00',
+    horaFim: '17:00',
+    horasUsadas: 9,
+    status: 'disponivel',
+    certificacao: 'Calibrado até 2024-12-31'
+  },
+  {
+    id: '5',
+    nome: 'Prensa Hidráulica 100T',
+    tipo: 'prensa',
+    categoria: 'industrial',
+    horaInicio: '07:00',
+    horaFim: '16:00',
+    horasUsadas: 9,
+    status: 'em_uso'
+  }
+];
+
+// Mock equipamentos para obra civil
 export const mockEquipamentos: Equipamento[] = [
   {
     id: '1',
     nome: 'Betoneira 400L',
     tipo: 'betoneira',
+    categoria: 'obra_civil',
     horaInicio: '07:00',
     horaFim: '16:00',
     horasUsadas: 9,
@@ -15,6 +41,7 @@ export const mockEquipamentos: Equipamento[] = [
     id: '2',
     nome: 'Escavadeira Cat 320',
     tipo: 'escavadeira',
+    categoria: 'obra_civil',
     horaInicio: '08:00',
     horaFim: '17:00',
     horasUsadas: 9,
@@ -24,6 +51,7 @@ export const mockEquipamentos: Equipamento[] = [
     id: '3',
     nome: 'Guindaste Torre',
     tipo: 'guindaste',
+    categoria: 'obra_civil',
     horaInicio: '07:00',
     horaFim: '18:00',
     horasUsadas: 11,
@@ -31,7 +59,6 @@ export const mockEquipamentos: Equipamento[] = [
   }
 ];
 
-// Mock data for demonstration
 export const mockObras: Obra[] = [
   {
     id: '1',
@@ -52,6 +79,16 @@ export const mockObras: Obra[] = [
     status: 'em_andamento',
     valor: 8500000,
     engenheiro: 'Maria Santos'
+  },
+  {
+    id: '3',
+    nome: 'Fábrica de Cimento Portland',
+    endereco: 'Distrito Industrial - Zona Norte',
+    cliente: 'Cimento Forte S.A.',
+    dataInicio: '2024-01-01',
+    status: 'em_andamento',
+    valor: 5000000,
+    engenheiro: 'Carlos Técnico'
   }
 ];
 
@@ -70,7 +107,7 @@ export const mockFuncionarios: Funcionario[] = [
   {
     id: '2',
     nome: 'Ana Costa',
-    cargo: 'Eletricista',
+    cargo: 'Eletricista Industrial',
     cpf: '987.654.321-02',
     telefone: '(11) 99999-2222',
     status: 'ativo',
@@ -79,7 +116,7 @@ export const mockFuncionarios: Funcionario[] = [
   {
     id: '3',
     nome: 'Roberto Lima',
-    cargo: 'Encanador',
+    cargo: 'Mecânico Industrial',
     cpf: '456.789.123-03',
     telefone: '(11) 99999-3333',
     status: 'ativo',
@@ -88,9 +125,13 @@ export const mockFuncionarios: Funcionario[] = [
 ];
 
 export const mockRDOs: RDO[] = [
+  // RDO de obra civil
   {
     id: '1',
+    tipo: 'obra_civil',
     obra: 'Edifício Residencial Sunset',
+    cliente: 'Construtora Alpha',
+    local: 'Rua das Flores, 123 - Bairro Jardim',
     data: '2024-01-08',
     responsavel: 'João Silva',
     clima: 'sol',
@@ -99,6 +140,7 @@ export const mockRDOs: RDO[] = [
     atividades: [
       {
         id: '1',
+        tipo: 'obra_civil',
         descricao: 'Concretagem da laje do 3º andar',
         inicio: '07:00',
         fim: '16:00',
@@ -108,6 +150,7 @@ export const mockRDOs: RDO[] = [
       },
       {
         id: '2',
+        tipo: 'obra_civil',
         descricao: 'Instalação elétrica 2º andar',
         inicio: '08:00',
         fim: '17:00',
@@ -154,7 +197,10 @@ export const mockRDOs: RDO[] = [
   },
   {
     id: '2',
+    tipo: 'obra_civil',
     obra: 'Shopping Center Plaza',
+    cliente: 'Grupo Beta',
+    local: 'Av. Principal, 456 - Centro',
     data: '2024-01-08',
     responsavel: 'Maria Santos',
     clima: 'nublado',
@@ -163,6 +209,7 @@ export const mockRDOs: RDO[] = [
     atividades: [
       {
         id: '3',
+        tipo: 'obra_civil',
         descricao: 'Montagem da estrutura metálica',
         inicio: '07:00',
         fim: '16:00',
@@ -192,13 +239,91 @@ export const mockRDOs: RDO[] = [
     observacoes: 'Aguardando aprovação do engenheiro responsável.',
     createdAt: '2024-01-08T17:30:00Z',
     updatedAt: '2024-01-08T17:30:00Z'
+  },
+  // RDO de manutenção industrial
+  {
+    id: '3',
+    tipo: 'manutencao_industrial',
+    obra: 'Fábrica de Cimento Portland',
+    cliente: 'Cimento Forte S.A.',
+    local: 'Unidade Industrial - Setor Moagem',
+    setor: 'Produção - Linha 2',
+    ativo: 'Moinho de Carvão MC-02',
+    os_numero: 'OS-2024-0156',
+    data: '2024-01-09',
+    responsavel: 'Carlos Técnico',
+    clima: 'sol',
+    temperatura: 32,
+    status: 'em_execucao',
+    atividades: [
+      {
+        id: '4',
+        tipo: 'manutencao_eletrica',
+        descricao: 'Substituição de motor elétrico 50HP',
+        inicio: '08:00',
+        fim: '12:00',
+        percentual: 75,
+        responsavel: 'Ana Costa',
+        especialidade: 'NR-10',
+        ativo_relacionado: 'Motor MC-02-001',
+        status: 'em_andamento',
+        observacoes_tecnicas: 'Motor com rolamento danificado, substituição necessária'
+      },
+      {
+        id: '5',
+        tipo: 'manutencao_mecanica',
+        descricao: 'Alinhamento e balanceamento do conjunto rotativo',
+        inicio: '13:00',
+        fim: '17:00',
+        percentual: 30,
+        responsavel: 'Roberto Lima',
+        especialidade: 'NR-12',
+        ativo_relacionado: 'Conjunto Rotativo MC-02',
+        status: 'nao_iniciado'
+      }
+    ],
+    equipes: [
+      {
+        id: '4',
+        funcionario: 'Ana Costa',
+        cargo: 'Eletricista Industrial',
+        horaInicio: '08:00',
+        horaFim: '17:00',
+        horasTrabalhadas: 8
+      },
+      {
+        id: '5',
+        funcionario: 'Roberto Lima',
+        cargo: 'Mecânico Industrial',
+        horaInicio: '08:00',
+        horaFim: '17:00',
+        horasTrabalhadas: 8
+      }
+    ],
+    fotos: [
+      {
+        id: '4',
+        url: '/api/placeholder/400/300',
+        descricao: 'Motor danificado antes da substituição',
+        timestamp: '2024-01-09T08:30:00Z'
+      },
+      {
+        id: '5',
+        url: '/api/placeholder/400/300',
+        descricao: 'Novo motor instalado',
+        timestamp: '2024-01-09T11:45:00Z'
+      }
+    ],
+    observacoes: 'Parada programada para manutenção preventiva. Atividades conforme plano de manutenção PM-2024.',
+    createdAt: '2024-01-09T18:00:00Z',
+    updatedAt: '2024-01-09T18:00:00Z'
   }
 ];
 
 export const mockDashboardMetrics: DashboardMetrics = {
   rdosHoje: 3,
   rdosPendentes: 1,
-  obrasAtivas: 2,
+  obrasAtivas: 3,
   funcionariosAtivos: 12,
   horasTrabalhadasSemana: 320,
   produtividadeSemana: 87

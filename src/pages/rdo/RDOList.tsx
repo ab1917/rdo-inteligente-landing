@@ -84,9 +84,9 @@ export function RDOList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">RDO - Relatório Diário de Obra</h1>
+          <h1 className="text-3xl font-bold">RDO - Obras e Manutenção Industrial</h1>
           <p className="text-muted-foreground">
-            Gerencie os relatórios diários de suas obras
+            Gerencie os relatórios de obras civis e manutenção industrial
           </p>
         </div>
         
@@ -126,6 +126,8 @@ export function RDOList() {
                   <SelectItem value="pendente">Pendente</SelectItem>
                   <SelectItem value="aprovado">Aprovado</SelectItem>
                   <SelectItem value="alerta">Alerta</SelectItem>
+                  <SelectItem value="em_execucao">Em Execução</SelectItem>
+                  <SelectItem value="finalizado">Finalizado</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -140,7 +140,10 @@ export function CreateRDO() {
   const onSubmit = async (data: RDOFormData) => {
     try {
       const rdoData: Omit<RDO, 'id' | 'createdAt' | 'updatedAt'> = {
+        tipo: 'obra_civil' as const,
         obra: data.obra,
+        cliente: mockObras.find(o => o.nome === data.obra)?.cliente || 'Cliente Padrão',
+        local: mockObras.find(o => o.nome === data.obra)?.endereco || 'Local Padrão',
         data: data.data,
         responsavel: data.responsavel,
         clima: data.clima,
@@ -149,6 +152,7 @@ export function CreateRDO() {
         status: 'rascunho' as const,
         atividades: data.atividades.map((ativ, index) => ({
           id: (index + 1).toString(),
+          tipo: 'obra_civil' as const,
           descricao: ativ.descricao,
           inicio: ativ.inicio,
           fim: ativ.fim,

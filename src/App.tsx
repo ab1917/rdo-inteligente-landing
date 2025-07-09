@@ -11,6 +11,7 @@ import { Login } from "./pages/auth/Login";
 import { Register } from "./pages/auth/Register";
 import { Dashboard } from "./pages/Dashboard";
 import { RDOList, CreateRDO } from "./pages/rdo";
+import { BudgetList } from "./pages/budgets";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,14 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <CreateRDO />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/orcamentos" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <BudgetList />
                 </AppLayout>
               </ProtectedRoute>
             } />

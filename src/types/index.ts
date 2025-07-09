@@ -9,17 +9,29 @@ export interface User {
 
 export interface RDO {
   id: string;
+  // Identificação expandida
+  tipo: 'obra_civil' | 'manutencao_industrial';
   obra: string;
+  cliente: string;
+  local: string;
+  setor?: string; // Para indústria
+  ativo?: string; // Equipamento/linha de produção
+  os_numero?: string; // Ordem de serviço
   data: string;
   responsavel: string;
+  // Condições ambientais
   clima: 'sol' | 'chuva' | 'nublado' | 'vento';
   temperatura: number;
-  status: 'rascunho' | 'pendente' | 'aprovado' | 'alerta';
+  // Status expandido
+  status: 'rascunho' | 'pendente' | 'aprovado' | 'alerta' | 'em_execucao' | 'finalizado';
+  // Dados técnicos
   atividades: Atividade[];
   equipes: EquipeRDO[];
   fotos: Foto[];
   equipamentos?: Equipamento[];
+  materiais?: Material[];
   ocorrencias?: Ocorrencia[];
+  checklists?: ChecklistTecnico[];
   observacoes?: string;
   assinatura?: string;
   createdAt: string;
@@ -28,12 +40,16 @@ export interface RDO {
 
 export interface Atividade {
   id: string;
+  tipo: 'obra_civil' | 'manutencao_eletrica' | 'manutencao_mecanica' | 'manutencao_civil' | 'inspecao';
   descricao: string;
   inicio: string;
   fim: string;
   percentual: number;
   responsavel: string;
-  status: 'nao_iniciado' | 'em_andamento' | 'concluido' | 'pausado';
+  especialidade?: string; // NR-10, NR-12, etc.
+  ativo_relacionado?: string; // Para manutenção industrial
+  status: 'nao_iniciado' | 'em_andamento' | 'concluido' | 'pausado' | 'cancelado';
+  observacoes_tecnicas?: string;
 }
 
 export interface EquipeRDO {
@@ -94,21 +110,54 @@ export interface Equipamento {
   id: string;
   nome: string;
   tipo: string;
+  categoria: 'obra_civil' | 'industrial' | 'medicao' | 'seguranca';
   horaInicio: string;
   horaFim: string;
   horasUsadas: number;
-  status: 'disponivel' | 'em_uso' | 'manutencao';
+  status: 'disponivel' | 'em_uso' | 'manutencao' | 'calibracao';
+  certificacao?: string; // Para equipamentos que precisam calibração
   observacoes?: string;
+}
+
+export interface Material {
+  id: string;
+  nome: string;
+  categoria: 'eletrico' | 'mecanico' | 'civil' | 'seguranca' | 'consumivel';
+  quantidade_usada: number;
+  unidade: string;
+  codigo_interno?: string;
+  observacoes?: string;
+}
+
+export interface ChecklistTecnico {
+  id: string;
+  tipo: 'nr10' | 'nr12' | 'apr' | 'pt' | 'iso9001' | 'custom';
+  nome: string;
+  itens: ChecklistItem[];
+  responsavel: string;
+  status: 'pendente' | 'em_andamento' | 'concluido' | 'nao_conforme';
+  observacoes?: string;
+}
+
+export interface ChecklistItem {
+  id: string;
+  descricao: string;
+  status: 'ok' | 'nok' | 'na' | 'pendente';
+  observacoes?: string;
+  foto_evidencia?: string;
 }
 
 export interface Ocorrencia {
   id: string;
-  tipo: 'acidente' | 'paralisacao' | 'mudanca_projeto' | 'clima_extremo' | 'entrega';
+  tipo: 'acidente' | 'paralisacao' | 'mudanca_projeto' | 'clima_extremo' | 'entrega' | 'falha_tecnica' | 'risco_eletrico' | 'parada_emergencial';
+  categoria: 'seguranca' | 'qualidade' | 'prazo' | 'tecnica' | 'ambiental';
   descricao: string;
   gravidade: 'baixa' | 'media' | 'alta' | 'critica';
   timestamp: string;
   responsavel: string;
+  ativo_afetado?: string;
   acoes_tomadas?: string;
+  status_resolucao: 'aberta' | 'em_tratamento' | 'resolvida' | 'cancelada';
 }
 
 export interface DashboardMetrics {
