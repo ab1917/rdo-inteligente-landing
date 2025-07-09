@@ -72,6 +72,9 @@ export interface Funcionario {
   status: 'ativo' | 'inativo';
   dataAdmissao: string;
   salario?: number;
+  especialidades: string[];
+  certificacoes?: Certificacao[];
+  valor_hora?: number;
 }
 
 export interface Equipe {
@@ -167,4 +170,29 @@ export interface DashboardMetrics {
   funcionariosAtivos: number;
   horasTrabalhadasSemana: number;
   produtividadeSemana: number;
+}
+
+export interface Certificacao {
+  id: string;
+  nome: string;
+  orgao_emissor: string;
+  numero: string;
+  data_emissao: string;
+  data_vencimento?: string;
+  arquivo_certificado?: string;
+}
+
+export interface EquipamentoMaster {
+  id: string;
+  nome: string;
+  tipo: string;
+  categoria: 'obra_civil' | 'industrial' | 'medicao' | 'seguranca';
+  valor_hora?: number;
+  manutencao_preventiva: number; // dias
+  calibracao_obrigatoria: boolean;
+  status: 'disponivel' | 'em_uso' | 'manutencao' | 'calibracao';
+  observacoes?: string;
+  certificacao?: string;
+  data_aquisicao?: string;
+  vida_util_anos?: number;
 }

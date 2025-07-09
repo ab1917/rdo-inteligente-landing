@@ -1,4 +1,4 @@
-import { RDO, Funcionario, Obra, DashboardMetrics, Equipamento } from '@/types';
+import type { RDO, DashboardMetrics, User, Funcionario, Equipe, Obra, Certificacao, EquipamentoMaster, Equipamento } from '@/types';
 
 // Mock equipamentos para indústria
 export const mockEquipamentosIndustriais: Equipamento[] = [
@@ -92,37 +92,270 @@ export const mockObras: Obra[] = [
   }
 ];
 
-export const mockFuncionarios: Funcionario[] = [
+export const funcionariosData: Funcionario[] = [
   {
     id: '1',
-    nome: 'Carlos Pereira',
+    nome: 'João Silva',
     cargo: 'Pedreiro',
-    cpf: '123.456.789-01',
-    telefone: '(11) 99999-1111',
-    email: 'carlos@email.com',
+    cpf: '123.456.789-00',
+    telefone: '(11) 99999-9999',
+    email: 'joao@email.com',
     status: 'ativo',
-    dataAdmissao: '2023-06-15',
-    salario: 3500
+    dataAdmissao: '2023-01-15',
+    salario: 3500,
+    especialidades: ['Alvenaria', 'Reboco', 'Estrutural'],
+    valor_hora: 35,
+    certificacoes: [
+      {
+        id: '1',
+        nome: 'NR-35 Trabalho em Altura',
+        orgao_emissor: 'SENAI',
+        numero: 'NR35-2023-001',
+        data_emissao: '2023-01-10',
+        data_vencimento: '2025-01-10'
+      }
+    ]
   },
   {
     id: '2',
-    nome: 'Ana Costa',
-    cargo: 'Eletricista Industrial',
-    cpf: '987.654.321-02',
-    telefone: '(11) 99999-2222',
+    nome: 'Maria Santos',
+    cargo: 'Eletricista',
+    cpf: '987.654.321-00',
+    telefone: '(11) 88888-8888',
+    email: 'maria@email.com',
     status: 'ativo',
-    dataAdmissao: '2023-08-20'
+    dataAdmissao: '2023-03-10',
+    salario: 4200,
+    especialidades: ['Elétrica Predial', 'Elétrica Industrial', 'NR-10'],
+    valor_hora: 55,
+    certificacoes: [
+      {
+        id: '2',
+        nome: 'NR-10 Segurança em Instalações Elétricas',
+        orgao_emissor: 'SENAI',
+        numero: 'NR10-2023-045',
+        data_emissao: '2023-02-15',
+        data_vencimento: '2025-02-15'
+      },
+      {
+        id: '3',
+        nome: 'NR-35 Trabalho em Altura',
+        orgao_emissor: 'SENAI',
+        numero: 'NR35-2023-067',
+        data_emissao: '2023-02-20',
+        data_vencimento: '2025-02-20'
+      }
+    ]
   },
   {
     id: '3',
-    nome: 'Roberto Lima',
-    cargo: 'Mecânico Industrial',
-    cpf: '456.789.123-03',
-    telefone: '(11) 99999-3333',
+    nome: 'Carlos Oliveira',
+    cargo: 'Soldador',
+    cpf: '456.789.123-00',
+    telefone: '(11) 77777-7777',
+    email: 'carlos@email.com',
     status: 'ativo',
-    dataAdmissao: '2023-09-10'
+    dataAdmissao: '2022-11-05',
+    salario: 4800,
+    especialidades: ['Solda Elétrica', 'Solda TIG', 'Solda MIG'],
+    valor_hora: 60,
+    certificacoes: [
+      {
+        id: '4',
+        nome: 'NR-18 Condições de Segurança',
+        orgao_emissor: 'SENAI',
+        numero: 'NR18-2022-123',
+        data_emissao: '2022-10-15',
+        data_vencimento: '2024-10-15'
+      }
+    ]
+  },
+  {
+    id: '4',
+    nome: 'Ana Costa',
+    cargo: 'Técnica em Mecânica',
+    cpf: '789.123.456-00',
+    telefone: '(11) 66666-6666',
+    email: 'ana@email.com',
+    status: 'ativo',
+    dataAdmissao: '2023-06-01',
+    salario: 5200,
+    especialidades: ['Manutenção Mecânica', 'Instrumentação', 'NR-12'],
+    valor_hora: 65,
+    certificacoes: [
+      {
+        id: '5',
+        nome: 'NR-12 Segurança no Trabalho em Máquinas',
+        orgao_emissor: 'SENAI',
+        numero: 'NR12-2023-089',
+        data_emissao: '2023-05-20',
+        data_vencimento: '2025-05-20'
+      }
+    ]
+  },
+  {
+    id: '5',
+    nome: 'Roberto Lima',
+    cargo: 'Encanador',
+    cpf: '321.654.987-00',
+    telefone: '(11) 55555-5555',
+    email: 'roberto@email.com',
+    status: 'ativo',
+    dataAdmissao: '2023-08-15',
+    salario: 3800,
+    especialidades: ['Hidráulica', 'Esgoto', 'Água Quente'],
+    valor_hora: 42
+  },
+  {
+    id: '6',
+    nome: 'Fernanda Souza',
+    cargo: 'Engenheira de Segurança',
+    cpf: '654.987.321-00',
+    telefone: '(11) 44444-4444',
+    email: 'fernanda@email.com',
+    status: 'ativo',
+    dataAdmissao: '2022-02-01',
+    salario: 8500,
+    especialidades: ['Segurança do Trabalho', 'CIPA', 'Auditorias'],
+    valor_hora: 95,
+    certificacoes: [
+      {
+        id: '6',
+        nome: 'Registro CREA',
+        orgao_emissor: 'CREA-SP',
+        numero: 'CREA-123456',
+        data_emissao: '2020-01-15'
+      }
+    ]
   }
 ];
+
+export const equipesData: Equipe[] = [
+  {
+    id: '1',
+    nome: 'Equipe Construção Civil',
+    lider: '1',
+    membros: ['1', '5'],
+    obra: 'Construção Residencial Vila Nova',
+    status: 'ativa'
+  },
+  {
+    id: '2',
+    nome: 'Equipe Elétrica Industrial',
+    lider: '2',
+    membros: ['2', '6'],
+    obra: 'Parada Técnica - Fábrica Cimento ABC',
+    status: 'ativa'
+  },
+  {
+    id: '3',
+    nome: 'Equipe Mecânica Especializada',
+    lider: '4',
+    membros: ['3', '4'],
+    obra: 'Manutenção Linha de Produção',
+    status: 'ativa'
+  },
+  {
+    id: '4',
+    nome: 'Equipe Multidisciplinar',
+    lider: '6',
+    membros: ['1', '2', '3', '4', '5'],
+    obra: 'Projeto Industrial Complexo',
+    status: 'inativa'
+  }
+];
+
+export const equipamentosData: EquipamentoMaster[] = [
+  {
+    id: '1',
+    nome: 'Betoneira 400L',
+    tipo: 'Misturador',
+    categoria: 'obra_civil',
+    valor_hora: 25,
+    manutencao_preventiva: 90,
+    calibracao_obrigatoria: false,
+    status: 'disponivel',
+    observacoes: 'Equipamento em bom estado'
+  },
+  {
+    id: '2',
+    nome: 'Multímetro Digital Fluke',
+    tipo: 'Instrumento de Medição',
+    categoria: 'medicao',
+    valor_hora: 15,
+    manutencao_preventiva: 180,
+    calibracao_obrigatoria: true,
+    status: 'disponivel',
+    observacoes: 'Calibração válida até 12/2024'
+  },
+  {
+    id: '3',
+    nome: 'Ponte Rolante 5T',
+    tipo: 'Equipamento de Elevação',
+    categoria: 'industrial',
+    valor_hora: 120,
+    manutencao_preventiva: 30,
+    calibracao_obrigatoria: true,
+    status: 'em_uso',
+    observacoes: 'Em uso na linha de produção A'
+  },
+  {
+    id: '4',
+    nome: 'Kit de Ferramentas Elétricas',
+    tipo: 'Ferramentas',
+    categoria: 'industrial',
+    valor_hora: 8,
+    manutencao_preventiva: 120,
+    calibracao_obrigatoria: false,
+    status: 'disponivel'
+  },
+  {
+    id: '5',
+    nome: 'Detector de Gases',
+    tipo: 'Equipamento de Segurança',
+    categoria: 'seguranca',
+    valor_hora: 35,
+    manutencao_preventiva: 60,
+    calibracao_obrigatoria: true,
+    status: 'calibracao',
+    observacoes: 'Enviado para calibração obrigatória'
+  },
+  {
+    id: '6',
+    nome: 'Prensa Hidráulica 50T',
+    tipo: 'Equipamento Industrial',
+    categoria: 'industrial',
+    valor_hora: 95,
+    manutencao_preventiva: 45,
+    calibracao_obrigatoria: false,
+    status: 'manutencao',
+    observacoes: 'Manutenção preventiva em andamento'
+  },
+  {
+    id: '7',
+    nome: 'Andaime Móvel',
+    tipo: 'Equipamento de Acesso',
+    categoria: 'obra_civil',
+    valor_hora: 12,
+    manutencao_preventiva: 60,
+    calibracao_obrigatoria: false,
+    status: 'disponivel'
+  },
+  {
+    id: '8',
+    nome: 'Termômetro Industrial',
+    tipo: 'Instrumento de Medição',
+    categoria: 'medicao',
+    valor_hora: 18,
+    manutencao_preventiva: 90,
+    calibracao_obrigatoria: true,
+    status: 'disponivel',
+    observacoes: 'Faixa de medição: -50°C a +500°C'
+  }
+];
+
+// Manter compatibilidade com código existente
+export const mockFuncionarios = funcionariosData;
 
 export const mockRDOs: RDO[] = [
   // RDO de obra civil
@@ -353,7 +586,13 @@ export const initializeData = () => {
     setStorageData('rdos', mockRDOs);
   }
   if (!localStorage.getItem('funcionarios')) {
-    setStorageData('funcionarios', mockFuncionarios);
+    setStorageData('funcionarios', funcionariosData);
+  }
+  if (!localStorage.getItem('equipes')) {
+    setStorageData('equipes', equipesData);
+  }
+  if (!localStorage.getItem('equipamentos')) {
+    setStorageData('equipamentos', equipamentosData);
   }
   if (!localStorage.getItem('obras')) {
     setStorageData('obras', mockObras);

@@ -52,6 +52,12 @@ const menuItems = [
     group: 'obras'
   },
   {
+    title: 'Funcionários',
+    url: '/funcionarios',
+    icon: Users,
+    group: 'obras'
+  },
+  {
     title: 'Equipamentos',
     url: '/equipamentos',
     icon: Truck,
@@ -66,7 +72,7 @@ const menuItems = [
   {
     title: 'CRM',
     url: '/crm',
-    icon: Users,
+    icon: Building2,
     group: 'gestao'
   },
   {
