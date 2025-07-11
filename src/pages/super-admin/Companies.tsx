@@ -26,9 +26,9 @@ const getPlanColor = (plan: string) => {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'active': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    case 'ativa': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
     case 'trial': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-    case 'suspended': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    case 'suspensa': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
     default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
   }
 };
@@ -44,9 +44,9 @@ const getPlanDisplayName = (plan: string) => {
 
 const getStatusDisplayName = (status: string) => {
   switch (status) {
-    case 'active': return 'Ativo';
+    case 'ativa': return 'Ativo';
     case 'trial': return 'Trial';
-    case 'suspended': return 'Suspenso';
+    case 'suspensa': return 'Suspenso';
     default: return status;
   }
 };
@@ -87,15 +87,15 @@ export const SuperAdminCompanies = () => {
                     <Building2 className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">{company.name}</CardTitle>
+                    <CardTitle className="text-xl">{company.nome}</CardTitle>
                     <CardDescription>
                       Criada em {new Date(company.created_at).toLocaleDateString('pt-BR')}
                     </CardDescription>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Badge className={getPlanColor(company.plan)}>
-                    {getPlanDisplayName(company.plan)}
+                  <Badge className={getPlanColor(company.plano)}>
+                    {getPlanDisplayName(company.plano)}
                   </Badge>
                   <Badge className={getStatusColor(company.status)}>
                     {getStatusDisplayName(company.status)}
@@ -139,7 +139,7 @@ export const SuperAdminCompanies = () => {
                 
                 <div className="flex items-center space-x-2">
                   <Select
-                    value={company.plan}
+                    value={company.plano}
                     onValueChange={(value) => updateCompanyPlan(company.id, value as any)}
                   >
                     <SelectTrigger className="w-32">
@@ -160,9 +160,9 @@ export const SuperAdminCompanies = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="ativa">Ativo</SelectItem>
                       <SelectItem value="trial">Trial</SelectItem>
-                      <SelectItem value="suspended">Suspenso</SelectItem>
+                      <SelectItem value="suspensa">Suspenso</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
