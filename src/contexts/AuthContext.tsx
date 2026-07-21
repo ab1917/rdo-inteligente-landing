@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { Database } from '@/lib/database.types';
 
 type UserRole = 'super_admin' | 'admin' | 'manager' | 'engineer' | 'viewer';
 type CompanyPlan = 'starter' | 'professional' | 'enterprise';
@@ -24,7 +23,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   register: (data: RegisterData) => Promise<boolean>;
   isLoading: boolean;
@@ -91,20 +90,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
 
       if (userData?.company) {
+        const company = userData.company as Record<string, any>;
+
         setUser({
           id: userData.id,
-          name: userData.name,
+          name: userData.name ?? userData.nome,
           email: userData.email,
           role: userData.role,
           company_id: userData.company_id,
           company: {
-            id: userData.company.id,
-            name: userData.company.name,
-            plan: userData.company.plan,
-            status: userData.company.status,
-            cnpj: userData.company.cnpj,
-            address: userData.company.address,
-            phone: userData.company.phone,
+            id: company.id,
+            name: company.name ?? company.nome,
+            plan: company.plan ?? company.plano,
+            status: company.status === 'ativa' ? 'active' : company.status === 'suspensa' ? 'suspended' : company.status,
+            cnpj: company.cnpj,
+            address: company.address ?? company.endereco,
+            phone: company.phone ?? company.telefone,
           }
         });
       }
@@ -113,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
     setIsLoading(true);
     
     try {
@@ -127,14 +128,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.user) {
         await loadUserData(data.user.id);
         setIsLoading(false);
-        return true;
+        return { success: true };
       }
     } catch (error) {
       console.error('Login error:', error);
+
+      const authError = error as { message?: string; status?: number; code?: string };
+      const isNetworkError = authError.message === 'Failed to fetch' || authError.status === 0;
+
+      setIsLoading(false);
+
+      if (isNetworkError) {
+        return {
+          success: false,
+          message: 'Não foi possível conectar ao servidor de autenticação. Verifique se a URL do Supabase está correta, ativa e acessível.',
+        };
+      }
+
+      return {
+        success: false,
+        message: authError.message || 'Verifique suas credenciais e tente novamente.',
+      };
     }
     
     setIsLoading(false);
-    return false;
+    return { success: false, message: 'Verifique suas credenciais e tente novamente.' };
   };
 
   const register = async (data: RegisterData): Promise<boolean> => {
