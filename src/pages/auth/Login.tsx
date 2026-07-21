@@ -18,9 +18,21 @@ const DEMO_USERS = [
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [copied, setCopied] = useState<string | null>(null);
   const { login, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const copyToClipboard = async (text: string, key: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(null), 1500);
+  };
+
+  const fillCredentials = (u: typeof DEMO_USERS[number]) => {
+    setEmail(u.email);
+    setPassword(u.password);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
