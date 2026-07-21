@@ -46,9 +46,9 @@ export const Login = () => {
       return;
     }
 
-    const success = await login(email, password);
+    const result = await login(email, password);
     
-    if (success) {
+    if (result.success) {
       toast({
         title: "Login realizado!",
         description: "Bem-vindo ao RDO Inteligente"
@@ -57,7 +57,7 @@ export const Login = () => {
     } else {
       toast({
         title: "Erro no login",
-        description: "Verifique suas credenciais e tente novamente.",
+        description: result.message ?? "Verifique suas credenciais e tente novamente.",
         variant: "destructive"
       });
     }
