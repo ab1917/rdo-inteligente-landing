@@ -103,54 +103,13 @@ export const Login = () => {
               )}
             </Button>
             
-            <div className="space-y-4">
-              <div className="border-t">
-                <div className="text-center text-sm text-muted-foreground mt-4 mb-3">
-                  Contas Demo para Teste
-                </div>
-                <div className="grid gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail('admin@construtorademo.com.br');
-                      setPassword('123456');
-                    }}
-                    className="text-xs p-2 rounded border border-border hover:bg-muted transition-colors text-left"
-                    disabled={isLoading}
-                  >
-                    <div className="font-medium">Ricardo Mendes - Administrador</div>
-                    <div className="text-muted-foreground">admin@construtorademo.com.br | 123456</div>
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail('engenheiro@construtorademo.com.br');
-                      setPassword('123456');
-                    }}
-                    className="text-xs p-2 rounded border border-border hover:bg-muted transition-colors text-left"
-                    disabled={isLoading}
-                  >
-                    <div className="font-medium">João Silva - Engenheiro</div>
-                    <div className="text-muted-foreground">engenheiro@construtorademo.com.br | 123456</div>
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail('gestor@construtorademo.com.br');
-                      setPassword('123456');
-                    }}
-                    className="text-xs p-2 rounded border border-border hover:bg-muted transition-colors text-left"
-                    disabled={isLoading}
-                  >
-                    <div className="font-medium">Maria Santos - Gestora</div>
-                    <div className="text-muted-foreground">gestor@construtorademo.com.br | 123456</div>
-                  </button>
-                </div>
+            <div className="w-full border-t pt-4 space-y-3">
+              <div className="rounded-md bg-muted/50 border border-border p-3 text-xs text-muted-foreground">
+                Use o email e a senha cadastrados na sua conta. Se ainda não tem
+                acesso, crie uma conta para começar a usar o RDO Inteligente.
               </div>
 
-              <div className="text-center text-sm text-muted-foreground border-t pt-4">
+              <div className="text-center text-sm text-muted-foreground">
                 Não tem uma conta?{' '}
                 <Link to="/register" className="text-primary hover:underline">
                   Cadastre-se aqui
