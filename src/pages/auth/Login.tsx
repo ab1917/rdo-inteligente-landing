@@ -7,7 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Building2 } from 'lucide-react';
+import { Loader2, Building2, Copy, Check } from 'lucide-react';
+
+const DEMO_USERS = [
+  { role: 'Admin', email: 'admin@construtorademo.com.br', password: '123456' },
+  { role: 'Gestor', email: 'gestor@construtorademo.com.br', password: '123456' },
+  { role: 'Engenheiro', email: 'engenheiro@construtorademo.com.br', password: '123456' },
+];
 
 export const Login = () => {
   const [email, setEmail] = useState('');
