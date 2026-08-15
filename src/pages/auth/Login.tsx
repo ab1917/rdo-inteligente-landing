@@ -62,6 +62,16 @@ export const Login = () => {
       return;
     }
 
+    const health = await runConnectivityCheck();
+    if (health.status !== 'ok') {
+      toast({
+        title: "Servidor de autenticação indisponível",
+        description: health.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     const result = await login(email, password);
     
     if (result.success) {
