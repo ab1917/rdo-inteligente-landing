@@ -1,13 +1,15 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Building2, Copy, Check } from 'lucide-react';
+import { checkSupabaseConnectivity, type ConnectivityResult } from '@/lib/supabase';
+import { Loader2, Building2, Copy, Check, WifiOff, CheckCircle2, RefreshCw } from 'lucide-react';
 
 const DEMO_USERS = [
   { role: 'Admin', email: 'admin@construtorademo.com.br', password: '123456' },
@@ -19,9 +21,23 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
+  const [connectivity, setConnectivity] = useState<ConnectivityResult | null>(null);
+  const [checking, setChecking] = useState(true);
   const { login, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const runConnectivityCheck = useCallback(async () => {
+    setChecking(true);
+    const result = await checkSupabaseConnectivity();
+    setConnectivity(result);
+    setChecking(false);
+    return result;
+  }, []);
+
+  useEffect(() => {
+    runConnectivityCheck();
+  }, [runConnectivityCheck]);
 
   const copyToClipboard = async (text: string, key: string) => {
     await navigator.clipboard.writeText(text);
