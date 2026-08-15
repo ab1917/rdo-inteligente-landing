@@ -106,6 +106,44 @@ export const Login = () => {
         
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {checking && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Verificando conexão com o servidor de autenticação...
+              </div>
+            )}
+
+            {!checking && connectivity && connectivity.status !== 'ok' && (
+              <Alert variant="destructive">
+                <WifiOff className="h-4 w-4" />
+                <AlertTitle>Servidor de autenticação inacessível</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  <p className="text-xs">{connectivity.message}</p>
+                  <p className="break-all text-[10px] opacity-80">
+                    Endpoint testado: {connectivity.url}/auth/v1/health
+                    {connectivity.httpStatus ? ` (HTTP ${connectivity.httpStatus})` : ''}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => runConnectivityCheck()}
+                  >
+                    <RefreshCw className="mr-1 h-3 w-3" />
+                    Testar novamente
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {!checking && connectivity?.status === 'ok' && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                Conexão com o servidor de autenticação OK.
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
