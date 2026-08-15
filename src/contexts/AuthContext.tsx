@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, checkSupabaseConnectivity } from '@/lib/supabase';
 
 type UserRole = 'super_admin' | 'admin' | 'manager' | 'engineer' | 'viewer';
 type CompanyPlan = 'starter' | 'professional' | 'enterprise';
