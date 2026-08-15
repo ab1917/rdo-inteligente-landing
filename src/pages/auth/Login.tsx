@@ -1,13 +1,15 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Building2, Copy, Check } from 'lucide-react';
+import { checkSupabaseConnectivity, type ConnectivityResult } from '@/lib/supabase';
+import { Loader2, Building2, Copy, Check, WifiOff, CheckCircle2, RefreshCw } from 'lucide-react';
 
 const DEMO_USERS = [
   { role: 'Admin', email: 'admin@construtorademo.com.br', password: '123456' },
@@ -19,9 +21,23 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
+  const [connectivity, setConnectivity] = useState<ConnectivityResult | null>(null);
+  const [checking, setChecking] = useState(true);
   const { login, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const runConnectivityCheck = useCallback(async () => {
+    setChecking(true);
+    const result = await checkSupabaseConnectivity();
+    setConnectivity(result);
+    setChecking(false);
+    return result;
+  }, []);
+
+  useEffect(() => {
+    runConnectivityCheck();
+  }, [runConnectivityCheck]);
 
   const copyToClipboard = async (text: string, key: string) => {
     await navigator.clipboard.writeText(text);
@@ -41,6 +57,16 @@ export const Login = () => {
       toast({
         title: "Campos obrigatórios",
         description: "Preencha email e senha para continuar.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const health = await runConnectivityCheck();
+    if (health.status !== 'ok') {
+      toast({
+        title: "Servidor de autenticação indisponível",
+        description: health.message,
         variant: "destructive"
       });
       return;
@@ -80,6 +106,44 @@ export const Login = () => {
         
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {checking && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Verificando conexão com o servidor de autenticação...
+              </div>
+            )}
+
+            {!checking && connectivity && connectivity.status !== 'ok' && (
+              <Alert variant="destructive">
+                <WifiOff className="h-4 w-4" />
+                <AlertTitle>Servidor de autenticação inacessível</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  <p className="text-xs">{connectivity.message}</p>
+                  <p className="break-all text-[10px] opacity-80">
+                    Endpoint testado: {connectivity.url}/auth/v1/health
+                    {connectivity.httpStatus ? ` (HTTP ${connectivity.httpStatus})` : ''}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => runConnectivityCheck()}
+                  >
+                    <RefreshCw className="mr-1 h-3 w-3" />
+                    Testar novamente
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {!checking && connectivity?.status === 'ok' && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                Conexão com o servidor de autenticação OK.
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, checkSupabaseConnectivity } from '@/lib/supabase';
 
 type UserRole = 'super_admin' | 'admin' | 'manager' | 'engineer' | 'viewer';
 type CompanyPlan = 'starter' | 'professional' | 'enterprise';
@@ -139,9 +139,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
 
       if (isNetworkError) {
+        const diagnostic = await checkSupabaseConnectivity();
         return {
           success: false,
-          message: 'Não foi possível conectar ao servidor de autenticação. Verifique se a URL do Supabase está correta, ativa e acessível.',
+          message: `Falha de conexão com o servidor de autenticação. ${diagnostic.message}`,
         };
       }
 
