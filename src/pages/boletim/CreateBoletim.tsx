@@ -4,13 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
-import { RDO } from '@/types';
+import { BoletimMedicao, RDO } from '@/types';
 import { getStorageData } from '@/services/mockData';
 import { ObraSelector } from '@/components/boletim/ObraSelector';
 import { PeriodSelector } from '@/components/boletim/PeriodSelector';
 import { useBoletimMedicao } from '@/hooks/useBoletimMedicao';
 import { BoletimMedicaoCompleto } from '@/components/boletim/BoletimMedicaoCompleto';
 import { toast } from '@/hooks/use-toast';
+import { MeasurementSettings } from '@/components/boletim/MeasurementSettings';
+import { createMeasurementConfig, normalizeRole } from '@/services/measurementConfig';
 
 const CreateBoletim = () => {
   const navigate = useNavigate();
@@ -22,29 +24,28 @@ const CreateBoletim = () => {
     tipo: 'dia' | 'semana' | 'quinzena' | 'mes' | 'personalizado';
   } | null>(null);
   const [rdosEncontrados, setRdosEncontrados] = useState<RDO[]>([]);
-  const [boletimGerado, setBoletimGerado] = useState<any>(null);
+  const [measurementConfig, setMeasurementConfig] = useState(createMeasurementConfig);
+  const [boletimGerado, setBoletimGerado] = useState<BoletimMedicao | null>(null);
   const [step, setStep] = useState<'config' | 'preview' | 'generated'>('config');
 
   useEffect(() => {
-    if (selectedObra && selectedPeriod) {
-      buscarRDOs();
+    if (!selectedObra || !selectedPeriod) {
+      setRdosEncontrados([]);
+      return;
     }
+    const rdos = getStorageData<RDO[]>('rdos', []).filter(rdo =>
+      rdo.obra === selectedObra && rdo.data.slice(0, 10) >= selectedPeriod.inicio && rdo.data.slice(0, 10) <= selectedPeriod.fim
+    );
+    setRdosEncontrados(rdos);
   }, [selectedObra, selectedPeriod]);
 
-  const buscarRDOs = () => {
-    const rdos = getStorageData<RDO[]>('rdos', []);
-    const rdosFiltrados = rdos.filter(rdo => {
-      const dataRdo = new Date(rdo.data);
-      const dataInicio = new Date(selectedPeriod!.inicio);
-      const dataFim = new Date(selectedPeriod!.fim);
-      
-      return rdo.obra === selectedObra && 
-             dataRdo >= dataInicio && 
-             dataRdo <= dataFim;
+  useEffect(() => {
+    const roles = [...new Set(rdosEncontrados.flatMap(rdo => rdo.equipes.map(e => e.cargo)))];
+    setMeasurementConfig(current => {
+      const missing = roles.filter(role => !current.tariffs.some(t => normalizeRole(t.role) === normalizeRole(role)));
+      return missing.length ? { ...current, tariffs: [...current.tariffs, ...missing.map(role => ({ role, hourly: 0 }))] } : current;
     });
-    
-    setRdosEncontrados(rdosFiltrados);
-  };
+  }, [rdosEncontrados]);
 
   const handleGerarBoletim = async () => {
     if (!selectedObra || !selectedPeriod || rdosEncontrados.length === 0) {
@@ -61,7 +62,8 @@ const CreateBoletim = () => {
         rdosEncontrados,
         selectedObra,
         selectedPeriod.inicio,
-        selectedPeriod.fim
+        selectedPeriod.fim,
+        measurementConfig
       );
       
       setBoletimGerado(boletim);
@@ -74,7 +76,7 @@ const CreateBoletim = () => {
     } catch (error) {
       toast({
         title: "Erro ao gerar boletim",
-        description: "Ocorreu um erro ao processar os dados. Tente novamente.",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao processar os dados. Tente novamente.",
         variant: "destructive"
       });
     }
@@ -220,6 +222,8 @@ const CreateBoletim = () => {
           )}
         </div>
       </div>
+
+      <MeasurementSettings value={measurementConfig} onChange={setMeasurementConfig} />
     </div>
   );
 };

@@ -1,5 +1,8 @@
 # Architecture rules
 
+- Keep measurement configuration as an explicit in-memory input and snapshot on generated bulletins until authenticated Neon persistence is available; never add an independent localStorage settings store.
+- Use the shared pure measurement calculator for configured single and consolidated bulletins, counting minutes and applying the night premium on the relevant rate, so generation paths cannot diverge.
+
 - Keep application business data in the connected Neon database; the Cloud database is not a replacement for it.
 - Keep RDO detail and analytics as separate protected pages using the shared RDO hook, and wait for loading before reporting a missing record so direct links work reliably.
 - Keep the RDO print document separate from the interactive detail view and render it from the same record and authenticated company, so PDF formatting cannot alter application data or navigation.

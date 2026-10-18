@@ -329,6 +329,7 @@ export interface BoletimMedicao {
   criado_em: string;
   aprovado_em?: string;
   aprovado_por?: string;
+  configuracao_medicao?: import('@/services/measurementConfig').MeasurementConfig;
 }
 
 export interface FuncionarioBoletim {
