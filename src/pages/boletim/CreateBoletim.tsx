@@ -12,7 +12,8 @@ import { useBoletimMedicao } from '@/hooks/useBoletimMedicao';
 import { BoletimMedicaoCompleto } from '@/components/boletim/BoletimMedicaoCompleto';
 import { toast } from '@/hooks/use-toast';
 import { MeasurementSettings } from '@/components/boletim/MeasurementSettings';
-import { createMeasurementConfig, normalizeRole } from '@/services/measurementConfig';
+import { normalizeRole } from '@/services/measurementConfig';
+import { useMeasurementSettings } from '@/hooks/useMeasurementSettings';
 
 const CreateBoletim = () => {
   const navigate = useNavigate();
