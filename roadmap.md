@@ -1,5 +1,7 @@
 # Neon migration
 
+- [ ] Configure measurement tariffs by role and editable weekly schedules from the uploaded tariff table and Secullum report. Await clarification of night-shift end time, night/overtime accumulation and tolerance billing rules before implementing calculations.
+
 - [x] Format RDO print/PDF after the uploaded model; verify authenticated detail and both PDF pages, with explicit unavailable-photo labels for broken source images.
 
 - [x] Correct RDO detail navigation at `/rdo/:id` and verify the existing report link (authenticated direct access, list link, report and missing record checked).
