@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Clock, Coins } from 'lucide-react';
+import { Plus, Trash2, Clock, Coins, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,9 +26,10 @@ export function MeasurementSettings({ value, onChange }: Props) {
     <h2 className="text-xl font-semibold">Tarifas e jornadas</h2>
     <Alert><AlertDescription>Configuração deste boletim · ainda não salva para outras sessões.</AlertDescription></Alert>
     <Tabs defaultValue="jornada">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="jornada"><Clock className="mr-2 h-4 w-4" />Jornada</TabsTrigger>
         <TabsTrigger value="tarifas"><Coins className="mr-2 h-4 w-4" />Tarifas</TabsTrigger>
+        <TabsTrigger value="locacao"><Wrench className="mr-2 h-4 w-4" />Locação</TabsTrigger>
         <TabsTrigger value="simulacao">Simulação</TabsTrigger>
       </TabsList>
       <TabsContent value="jornada" className="space-y-5">
@@ -71,6 +72,18 @@ export function MeasurementSettings({ value, onChange }: Props) {
             <TableCell className="whitespace-nowrap">{currency(tariff.hourly * (1 + value.overtime60 / 100))}</TableCell><TableCell className="whitespace-nowrap">{currency(tariff.hourly * (1 + value.overtime100 / 100))}</TableCell><TableCell className="whitespace-nowrap">{currency(tariff.hourly * (1 + value.nightPercent / 100))}</TableCell>
           </TableRow>)}</TableBody></Table></div>
         <Button variant="outline" onClick={() => onChange({ ...value, tariffs: [...value.tariffs, { role: '', hourly: 0 }] })}><Plus className="mr-2 h-4 w-4" />Adicionar função</Button>
+      </TabsContent>
+      <TabsContent value="locacao" className="space-y-4">
+        <Alert><AlertDescription>Locação cobrada pela melhor combinação de períodos (mês + quinzena + semana + diárias); dias parciais são proporcionais às horas (diária ÷ 8 h). Períodos em branco não são cotados.</AlertDescription></Alert>
+        <div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Equipamento</TableHead><TableHead>Diária</TableHead><TableHead>Semanal</TableHead><TableHead>Quinzenal</TableHead><TableHead>Mensal</TableHead><TableHead /></TableRow></TableHeader>
+          <TableBody>{value.rentals.map((rental, index) => <TableRow key={index}>
+            <TableCell><Input aria-label={`Equipamento ${index + 1}`} className="min-w-52" value={rental.equipment} onChange={e => onChange({ ...value, rentals: value.rentals.map((r, i) => i === index ? { ...r, equipment: e.target.value } : r) })} /></TableCell>
+            {(['daily', 'weekly', 'fortnightly', 'monthly'] as const).map(key => <TableCell key={key}>
+              <Input className="w-28" aria-label={`${key === 'daily' ? 'Diária' : key === 'weekly' ? 'Semanal' : key === 'fortnightly' ? 'Quinzenal' : 'Mensal'} ${rental.equipment}`} type="number" min="0" step="0.01" value={rental[key] ?? ''} placeholder="—" onChange={e => onChange({ ...value, rentals: value.rentals.map((r, i) => i === index ? { ...r, [key]: e.target.value === '' ? undefined : Number(e.target.value) } : r) })} />
+            </TableCell>)}
+            <TableCell><Button size="icon" variant="ghost" aria-label={`Remover locação ${rental.equipment}`} onClick={() => onChange({ ...value, rentals: value.rentals.filter((_, i) => i !== index) })}><Trash2 className="h-4 w-4" /></Button></TableCell>
+          </TableRow>)}</TableBody></Table></div>
+        <Button variant="outline" onClick={() => onChange({ ...value, rentals: [...value.rentals, { equipment: '', daily: 0 }] })}><Plus className="mr-2 h-4 w-4" />Adicionar equipamento</Button>
       </TabsContent>
       <TabsContent value="simulacao" className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
