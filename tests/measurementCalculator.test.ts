@@ -1,8 +1,7 @@
-/// <reference types="bun" />
 import { describe, expect, test } from 'bun:test';
-import { createMeasurementConfig, roleTariffs, workSchedules } from './measurementConfig';
-import { calculateMeasurement } from './measurementCalculator';
-import { buildConfiguredBoletim } from './configuredBoletim';
+import { createMeasurementConfig, roleTariffs, workSchedules } from '../src/services/measurementConfig';
+import { calculateMeasurement } from '../src/services/measurementCalculator';
+import { buildConfiguredBoletim } from '../src/services/configuredBoletim';
 import type { RDO } from '@/types';
 
 describe('Supplied measurement rules', () => {
