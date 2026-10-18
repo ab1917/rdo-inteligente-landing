@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Edit3, CheckCircle, FileText, Download } from 'lucide-react';
+import { ArrowLeft, Edit3, CheckCircle, FileText, Printer } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -92,7 +92,7 @@ const BoletimDetail = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate('/boletim')}>
+          <Button variant="ghost" className="print:hidden" onClick={() => navigate('/boletim')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
@@ -108,7 +108,7 @@ const BoletimDetail = () => {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 print:hidden">
           {boletim.status === 'rascunho' && (
             <Button 
               onClick={handleAprovar}
@@ -120,9 +120,9 @@ const BoletimDetail = () => {
             </Button>
           )}
           
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Exportar PDF
+          <Button variant="outline" className="gap-2 print:hidden" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />
+            Imprimir / PDF
           </Button>
           
           {boletim.status === 'rascunho' && (

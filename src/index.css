@@ -117,3 +117,47 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* ===== Impressão / exportação PDF (RDO, Boletim de Medição etc.) ===== */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Esconde navegação, botões e elementos marcados como não imprimíveis */
+  .print\:hidden,
+  [data-print-hidden] {
+    display: none !important;
+  }
+
+  /* Conteúdo ocupa a página inteira */
+  main {
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Evita quebrar cards e linhas de tabela no meio */
+  .card, [class*="Card"], tr, figure, section {
+    break-inside: avoid;
+  }
+
+  h1, h2, h3 {
+    break-after: avoid;
+  }
+
+  /* Imagens não ultrapassam a página */
+  img {
+    max-width: 100% !important;
+  }
+
+  /* Sombras e fundos pesados atrapalham a leitura no papel */
+  .shadow, [class*="shadow"] {
+    box-shadow: none !important;
+  }
+}

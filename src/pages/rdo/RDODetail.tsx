@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, BarChart3, Loader2 } from 'lucide-react';
+import { ArrowLeft, BarChart3, Loader2, Printer } from 'lucide-react';
 import { useRDO } from '@/hooks/useRDO';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,7 @@ export function RDODetail() {
     return <div className="flex justify-center py-16" role="status" aria-label="Carregando RDO"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
-  const back = <Button variant="ghost" asChild><Link to="/rdo"><ArrowLeft className="mr-2 h-4 w-4" />Voltar para RDOs</Link></Button>;
+  const back = <Button variant="ghost" className="print:hidden" asChild><Link to="/rdo"><ArrowLeft className="mr-2 h-4 w-4" />Voltar para RDOs</Link></Button>;
 
   if (!rdo) {
     return <div className="space-y-6">{back}<h1 className="text-2xl font-bold">RDO não encontrado</h1><p className="text-muted-foreground">O relatório solicitado não está disponível.</p></div>;
@@ -29,7 +29,10 @@ export function RDODetail() {
           <p className="text-muted-foreground">Relatório Diário de Obras · {new Date(`${rdo.data}T12:00:00`).toLocaleDateString('pt-BR')}</p>
           <div className="flex flex-wrap gap-2"><StatusBadge status={rdo.status} /><Badge variant="outline">{rdo.tipo === 'obra_civil' ? 'Obra Civil' : 'Manutenção Industrial'}</Badge></div>
         </div>
-        <Button variant="outline" asChild><Link to={`/rdo/${rdo.id}/relatorio`}><BarChart3 className="mr-2 h-4 w-4" />Relatório</Link></Button>
+        <div className="flex gap-2 print:hidden">
+          <Button variant="outline" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />Imprimir / PDF</Button>
+          <Button variant="outline" asChild><Link to={`/rdo/${rdo.id}/relatorio`}><BarChart3 className="mr-2 h-4 w-4" />Relatório</Link></Button>
+        </div>
       </header>
       <dl className="grid gap-4 border-y py-6 sm:grid-cols-2 lg:grid-cols-4">
         {[
