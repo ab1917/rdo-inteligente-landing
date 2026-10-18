@@ -89,6 +89,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
+      // Roles live in the protected user_roles table
+      const { data: roleRows } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+      const role = (roleRows?.[0]?.role ?? 'viewer') as UserRole;
+
       if (userData?.company) {
         const company = userData.company as Record<string, any>;
 
@@ -96,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: userData.id,
           name: userData.name ?? userData.nome,
           email: userData.email,
-          role: userData.role,
+          role,
           company_id: userData.company_id,
           company: {
             id: company.id,
@@ -196,11 +203,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: authData.user.id,
             email: data.email,
             name: data.name,
-            role: data.role,
             company_id: companyData.id
           });
 
         if (userError) throw userError;
+
+        // Assign role in the protected roles table
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: authData.user.id, role: data.role });
+
+        if (roleError) throw roleError;
 
         await loadUserData(authData.user.id);
         setIsLoading(false);
