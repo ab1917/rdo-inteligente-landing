@@ -1,6 +1,7 @@
 import type { BoletimMedicao, RDO, FuncionarioBoletim, EquipamentoBoletim, MaterialBoletim, ResumoFinanceiro } from '@/types';
 import { calculateMeasurement } from './measurementCalculator';
 import { validateMeasurementConfig, normalizeRole, type MeasurementConfig } from './measurementConfig';
+import { calculateRentalCost, findRentalTariff } from './rentalCalculator';
 
 export function buildConfiguredBoletim(rdos: RDO[], config: MeasurementConfig, obra: string, inicio: string, fim: string): BoletimMedicao {
   validateMeasurementConfig(config);
@@ -22,11 +23,11 @@ export function buildConfiguredBoletim(rdos: RDO[], config: MeasurementConfig, o
         });
       }
     }
-    // Preserve existing equipment/material pricing; rental tariffs require a separate billing unit decision.
+    // Equipment rental uses the configured tariffs: cheapest period combination, partial days proportional to hours.
     for (const item of rdo.equipamentos ?? []) {
       const previous = equipment.get(item.id);
-      if (previous) { previous.horas_utilizadas += item.horasUsadas; previous.valor_total += item.horasUsadas * 25; }
-      else equipment.set(item.id, { equipamento_id: item.id, equipamento_nome: item.nome, categoria: item.categoria, horas_utilizadas: item.horasUsadas, valor_hora: 25, valor_total: item.horasUsadas * 25, responsavel: 'N/A' });
+      if (previous) { previous.horas_utilizadas += item.horasUsadas; }
+      else equipment.set(item.id, { equipamento_id: item.id, equipamento_nome: item.nome, categoria: item.categoria, horas_utilizadas: item.horasUsadas, valor_hora: 0, valor_total: 0, responsavel: 'N/A' });
     }
     for (const item of rdo.materiais ?? []) {
       const previous = materials.get(item.id);
@@ -35,6 +36,18 @@ export function buildConfiguredBoletim(rdos: RDO[], config: MeasurementConfig, o
     }
   }
   const funcionarios = [...employees.values()], equipamentos = [...equipment.values()], materiais = [...materials.values()];
+  for (const item of equipamentos) {
+    const tariff = findRentalTariff(config.rentals, item.equipamento_nome);
+    if (tariff) {
+      const rental = calculateRentalCost(tariff, item.horas_utilizadas);
+      item.valor_total = rental.value;
+      item.valor_hora = item.horas_utilizadas > 0 ? Math.round(rental.value / item.horas_utilizadas * 100) / 100 : 0;
+      item.responsavel = rental.description;
+    } else {
+      item.valor_hora = 25;
+      item.valor_total = Math.round(item.horas_utilizadas * 25 * 100) / 100;
+    }
+  }
   const total = (field: typeof sumFields[number]) => Math.round(funcionarios.reduce((sum, f) => sum + f[field], 0) * 100) / 100;
   const total_funcionarios = total('valor_total');
   const total_equipamentos = equipamentos.reduce((sum, item) => sum + item.valor_total, 0);
