@@ -2,9 +2,11 @@ export interface WorkPeriod { start: string; end: string }
 export interface ScheduleDay { mode: 'normal' | 'extra' | 'folga'; periods: WorkPeriod[] }
 export interface WorkSchedule { id: string; name: string; days: ScheduleDay[] }
 export interface RoleTariff { role: string; hourly: number }
+export interface RentalTariff { equipment: string; daily?: number; weekly?: number; fortnightly?: number; monthly?: number }
 export interface MeasurementConfig {
   schedule: WorkSchedule;
   tariffs: RoleTariff[];
+  rentals: RentalTariff[];
   overtime60: number;
   overtime100: number;
   nightPercent: number;
@@ -41,9 +43,21 @@ export const workSchedules: WorkSchedule[] = [
 ];
 workSchedules[5].days[0] = { mode: 'folga', periods: [] };
 
+// Missing periods are unquoted, not zero: the cheapest combination may only use quoted periods.
+export const rentalTariffs: RentalTariff[] = [
+  { equipment: 'Detector multgás', daily: 100, monthly: 1000 },
+  { equipment: 'Cilindro bump test', weekly: 500, fortnightly: 750, monthly: 1500 },
+  { equipment: 'Rádio comunicador PX', weekly: 100, fortnightly: 150, monthly: 220 },
+  { equipment: 'Decibelímetro', daily: 40 },
+  { equipment: 'Máquina de pintura airless', daily: 70, weekly: 320, fortnightly: 700, monthly: 1200 },
+  { equipment: 'Oxímetro', daily: 40 },
+  { equipment: 'Martelete rompedor', daily: 100 },
+  { equipment: 'Tufão tanque de pintura', daily: 70, weekly: 320, fortnightly: 700, monthly: 1200 },
+];
+
 export const normalizeRole = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 export function createMeasurementConfig(): MeasurementConfig {
-  return { schedule: structuredClone(workSchedules[0]), tariffs: structuredClone(roleTariffs), overtime60: 60, overtime100: 100, nightPercent: 20, nightStart: '22:00', nightEnd: '05:00', holidays: [] };
+  return { schedule: structuredClone(workSchedules[0]), tariffs: structuredClone(roleTariffs), rentals: structuredClone(rentalTariffs), overtime60: 60, overtime100: 100, nightPercent: 20, nightStart: '22:00', nightEnd: '05:00', holidays: [] };
 }
 
 export const minuteOfDay = (time: string) => {
@@ -77,4 +91,8 @@ export function validateMeasurementConfig(config: MeasurementConfig): void {
   minuteOfDay(config.nightStart); minuteOfDay(config.nightEnd);
   if (config.nightStart === config.nightEnd) throw new Error('O período noturno precisa de início e fim diferentes.');
   if (config.tariffs.some(t => !t.role.trim() || !Number.isFinite(t.hourly) || t.hourly < 0)) throw new Error('Revise as tarifas por função.');
+  for (const rental of config.rentals) {
+    const prices = [rental.daily, rental.weekly, rental.fortnightly, rental.monthly].filter(p => p !== undefined);
+    if (!rental.equipment.trim() || !prices.length || prices.some(p => !Number.isFinite(p!) || p! <= 0)) throw new Error('Revise as tarifas de locação de equipamentos.');
+  }
 }
