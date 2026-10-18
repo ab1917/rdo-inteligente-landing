@@ -1,6 +1,6 @@
 # Neon migration
 
-- [ ] Correct RDO detail navigation at `/rdo/:id` and verify the existing report link.
+- [x] Correct RDO detail navigation at `/rdo/:id` and verify the existing report link (authenticated direct access, list link, report and missing record checked).
 
 - [x] Verify Neon schema, existing data and credential path (17 application tables, 2 companies, no application users or auth accounts).
 - [x] Enable Lovable Cloud for protected server operations; retain Neon as the business database.
