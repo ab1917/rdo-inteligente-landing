@@ -1,4 +1,5 @@
-import type { RDO } from '@/types';
+import { useState } from 'react';
+import type { Foto, RDO } from '@/types';
 
 interface RDOPrintDocumentProps {
   rdo: RDO;
@@ -9,6 +10,14 @@ const dateLabel = (date: string) => {
   const value = new Date(`${date}T12:00:00`);
   return Number.isNaN(value.getTime()) ? '—' : value.toLocaleDateString('pt-BR');
 };
+
+function DocumentPhoto({ photo }: { photo: Foto }) {
+  const [unavailable, setUnavailable] = useState(false);
+  return <figure>
+    <div className="rdo-document-photo">{unavailable ? <span>Imagem indisponível</span> : <img src={photo.url} alt={photo.descricao || 'Registro fotográfico da obra'} onError={() => setUnavailable(true)} />}</div>
+    <figcaption>{photo.descricao || 'Registro fotográfico'}<span>{photo.timestamp ? new Date(photo.timestamp).toLocaleDateString('pt-BR') : ''}</span></figcaption>
+  </figure>;
+}
 
 export function RDOPrintDocument({ rdo, companyName }: RDOPrintDocumentProps) {
   const roles = rdo.equipes.reduce<Record<string, number>>((result, member) => {
@@ -56,7 +65,7 @@ export function RDOPrintDocument({ rdo, companyName }: RDOPrintDocumentProps) {
           <h2>DESCRIÇÃO DOS SERVIÇOS</h2>
           <h3>SEGURANÇA / VERIFICAÇÕES TÉCNICAS</h3>
           <div className="rdo-document-text">
-            {rdo.checklists?.length ? rdo.checklists.map(item => <p key={item.id}>{item.nome} — {item.status.replaceAll('_', ' ')}{item.observacoes ? ` · ${item.observacoes}` : ''}</p>) : <p>Sem checklist registrado.</p>}
+            {rdo.checklists?.length ? rdo.checklists.map(item => <p key={item.id}>{item.nome} — {item.status.replace(/_/g, ' ')}{item.observacoes ? ` · ${item.observacoes}` : ''}</p>) : <p>Sem checklist registrado.</p>}
             {rdo.validacao_tecnica?.alertas.map((alert, index) => <p key={index}>{alert}</p>)}
           </div>
           <h3>SERVIÇOS EXECUTADOS</h3>
@@ -85,7 +94,7 @@ export function RDOPrintDocument({ rdo, companyName }: RDOPrintDocumentProps) {
     {photoPages.map((page, index) => <div className="rdo-document-sheet rdo-document-photo-sheet" key={index}>
       {header(index + 2)}
       <h2>REGISTRO FOTOGRÁFICO — PRINCIPAIS ATIVIDADES</h2>
-      <div className="rdo-document-photos">{page.map(photo => <figure key={photo.id}><div className="rdo-document-photo"><img src={photo.url} alt={photo.descricao || 'Registro fotográfico da obra'} onError={event => { event.currentTarget.style.display = 'none'; }} /></div><figcaption>{photo.descricao || 'Registro fotográfico'}<span>{photo.timestamp ? new Date(photo.timestamp).toLocaleDateString('pt-BR') : ''}</span></figcaption></figure>)}</div>
+      <div className="rdo-document-photos">{page.map(photo => <DocumentPhoto key={photo.id} photo={photo} />)}</div>
       {signatures}
     </div>)}
   </article>;
