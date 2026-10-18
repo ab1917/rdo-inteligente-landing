@@ -24,7 +24,7 @@ export function MeasurementSettings({ value, onChange }: Props) {
 
   return <section className="space-y-5 border-t pt-6">
     <h2 className="text-xl font-semibold">Tarifas e jornadas</h2>
-    <Alert><AlertDescription>Configuração deste boletim · ainda não salva para outras sessões.</AlertDescription></Alert>
+    <Alert><AlertDescription>Configuração da empresa · use “Salvar configuração da empresa” abaixo para gravar no banco de dados.</AlertDescription></Alert>
     <Tabs defaultValue="jornada">
       <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="jornada"><Clock className="mr-2 h-4 w-4" />Jornada</TabsTrigger>
