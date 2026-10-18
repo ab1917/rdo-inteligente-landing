@@ -10,7 +10,7 @@ import Index from "./pages/Index";
 import { Login } from "./pages/auth/Login";
 import { Register } from "./pages/auth/Register";
 import { Dashboard } from "./pages/Dashboard";
-import { RDOList, CreateRDO } from "./pages/rdo";
+import { RDOList, CreateRDO, RDODetail, RDORelatorio } from "./pages/rdo";
 import { BudgetList } from "./pages/budgets";
 import { EquipeList, FuncionarioList, EquipamentoList } from "./pages/equipes";
 import { CRMDashboard, LeadsList, OportunidadesList, ClientesList } from "./pages/crm";
@@ -60,6 +60,22 @@ const App = () => (
               </ProtectedRoute>
             } />
             
+            <Route path="/rdo/:id" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <RDODetail />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/rdo/:id/relatorio" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <RDORelatorio />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+
             <Route path="/orcamentos" element={
               <ProtectedRoute>
                 <AppLayout>

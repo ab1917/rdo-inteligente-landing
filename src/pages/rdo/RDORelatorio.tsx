@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, FileText, BarChart3, Clock, Settings } from 'lucide-react';
+import { ArrowLeft, FileText, BarChart3, Clock, Settings, Loader2 } from 'lucide-react';
 import { useRDO } from '@/hooks/useRDO';
 import { RDOOrcamentoIntegration } from '@/components/rdo/RDOOrcamentoIntegration';
 import { RelatorioGerencial } from '@/components/rdo/RelatorioGerencial';
@@ -13,9 +13,13 @@ import { StatusBadge } from '@/components/rdo/StatusBadge';
 
 export function RDORelatorio() {
   const { id } = useParams();
-  const { getRDOById } = useRDO();
+  const { getRDOById, loading } = useRDO();
   
   const rdo = id ? getRDOById(id) : undefined;
+
+  if (loading) {
+    return <div className="flex justify-center py-16" role="status" aria-label="Carregando relatório"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
 
   if (!rdo) {
     return (
