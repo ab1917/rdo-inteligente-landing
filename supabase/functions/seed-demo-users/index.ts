@@ -70,10 +70,16 @@ Deno.serve(async (req) => {
         id: userId,
         email: u.email,
         name: u.name,
-        role: u.role,
         company_id: companyId,
       });
       if (upsertError) throw upsertError;
+
+      // Assign role in the protected roles table
+      const { error: roleError } = await admin.from('user_roles').upsert(
+        { user_id: userId, role: u.role },
+        { onConflict: 'user_id,role' },
+      );
+      if (roleError) throw roleError;
 
       results.push({ email: u.email, status: existing ? 'already existed, profile synced' : 'created' });
     }
