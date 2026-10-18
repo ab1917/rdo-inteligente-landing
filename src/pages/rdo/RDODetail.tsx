@@ -4,10 +4,13 @@ import { useRDO } from '@/hooks/useRDO';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/rdo/StatusBadge';
+import { RDOPrintDocument } from '@/components/rdo/RDOPrintDocument';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function RDODetail() {
   const { id } = useParams();
   const { getRDOById, loading } = useRDO();
+  const { user } = useAuth();
   const rdo = id ? getRDOById(id) : undefined;
 
   if (loading) {
@@ -21,7 +24,9 @@ export function RDODetail() {
   }
 
   return (
-    <div className="space-y-8">
+    <>
+    <RDOPrintDocument rdo={rdo} companyName={user?.company.name} />
+    <div className="space-y-8 print:hidden">
       {back}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 space-y-2">
@@ -61,5 +66,6 @@ export function RDODetail() {
       {rdo.observacoes && <section className="space-y-3"><h2 className="text-xl font-semibold">Observações</h2><p className="whitespace-pre-wrap break-words">{rdo.observacoes}</p></section>}
       {rdo.validacao_tecnica?.alertas.length > 0 && <section className="space-y-3"><h2 className="text-xl font-semibold">Alertas técnicos</h2><ul className="list-inside list-disc text-destructive">{rdo.validacao_tecnica.alertas.map(alerta => <li key={alerta}>{alerta}</li>)}</ul></section>}
     </div>
+    </>
   );
 }
