@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { calculateRentalCost, findRentalTariff, RENTAL_DAY_HOURS } from '@/services/rentalCalculator';
-import { rentalTariffs, createMeasurementConfig } from '@/services/measurementConfig';
+import { describe, it, expect } from 'bun:test';
+import { calculateRentalCost, findRentalTariff, RENTAL_DAY_HOURS } from '../src/services/rentalCalculator';
+import { rentalTariffs, createMeasurementConfig } from '../src/services/measurementConfig';
 
 const byName = (name: string) => rentalTariffs.find(r => r.equipment === name)!;
 
