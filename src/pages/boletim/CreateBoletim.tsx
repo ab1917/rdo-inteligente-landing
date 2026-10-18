@@ -25,7 +25,7 @@ const CreateBoletim = () => {
     tipo: 'dia' | 'semana' | 'quinzena' | 'mes' | 'personalizado';
   } | null>(null);
   const [rdosEncontrados, setRdosEncontrados] = useState<RDO[]>([]);
-  const [measurementConfig, setMeasurementConfig] = useState(createMeasurementConfig);
+  const { config: measurementConfig, setConfig: setMeasurementConfig, loading: settingsLoading, saving: settingsSaving, error: settingsError, save: saveSettings } = useMeasurementSettings();
   const [boletimGerado, setBoletimGerado] = useState<BoletimMedicao | null>(null);
   const [step, setStep] = useState<'config' | 'preview' | 'generated'>('config');
 
@@ -225,6 +225,21 @@ const CreateBoletim = () => {
       </div>
 
       <MeasurementSettings value={measurementConfig} onChange={setMeasurementConfig} />
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          disabled={settingsLoading || settingsSaving}
+          onClick={async () => {
+            const saved = await saveSettings(measurementConfig);
+            if (saved) toast({ title: "Configuração salva", description: "Tarifas e jornadas salvas para a empresa." });
+            else toast({ title: "Erro ao salvar", description: settingsError || "Tente novamente.", variant: "destructive" });
+          }}
+        >
+          {settingsSaving ? 'Salvando...' : 'Salvar configuração da empresa'}
+        </Button>
+        {settingsLoading && <span className="text-sm text-muted-foreground">Carregando configuração salva...</span>}
+        {!settingsLoading && settingsError && <span className="text-sm text-muted-foreground">{settingsError}</span>}
+      </div>
     </div>
   );
 };
