@@ -8,6 +8,13 @@
       "when": 1792283808844,
       "tag": "0000_create_companies_users_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792283833360,
+      "tag": "0001_allow_self_role_insert_on_signup",
+      "breakpoints": true
     }
   ]
 }
