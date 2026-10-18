@@ -44,9 +44,10 @@ export const superAdminService = {
 
       if (usersError) throw usersError;
 
-      const totalCompanies = companies?.length || 0;
-      const activeCompanies = companies?.filter(c => c.status === 'active').length || 0;
-      const totalUsers = users?.length || 0;
+      const companyRows = (companies as any[] | null) || [];
+      const totalCompanies = companyRows.length;
+      const activeCompanies = companyRows.filter(c => c.status === 'active' || c.status === 'ativa').length;
+      const totalUsers = (users as any[] | null)?.length || 0;
 
       // Calculate plan distribution
       const planDistribution = companies?.reduce((acc, company) => {
@@ -93,7 +94,7 @@ export const superAdminService = {
 
       const planPrices = { starter: 297, professional: 597, enterprise: 1297 };
 
-      return companies?.map(company => ({
+      return (companies as any[] | null)?.map(company => ({
         id: company.id,
         name: company.name,
         plan: company.plan,
