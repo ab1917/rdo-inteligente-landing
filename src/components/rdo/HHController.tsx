@@ -22,11 +22,11 @@ interface HHControllerProps {
 }
 
 export function HHController({ rdo, showDetails = true }: HHControllerProps) {
-  const { hhData, gerarRelatorioProdutividade } = useHHControl();
+  const { hhData, gerarRelatorioProdutividade, atualizarHHControl } = useHHControl();
   
   React.useEffect(() => {
-    const { atualizarHHControl } = useHHControl();
     atualizarHHControl(rdo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rdo]);
 
   const relatorio = gerarRelatorioProdutividade();
