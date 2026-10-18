@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { describe, expect, test } from 'bun:test';
 import { createMeasurementConfig, roleTariffs, workSchedules } from './measurementConfig';
 import { calculateMeasurement } from './measurementCalculator';
