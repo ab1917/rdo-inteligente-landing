@@ -1,6 +1,6 @@
 # Architecture rules
 
-- Keep measurement configuration as an explicit in-memory input and snapshot on generated bulletins until authenticated Neon persistence is available; never add an independent localStorage settings store.
+- Measurement configuration is shared per company and persisted in Neon (`public.measurement_settings`) through the `neon-measurement-settings` edge function; generated bulletins keep a snapshot of the config used. Never add an independent localStorage settings store.
 - Use the shared pure measurement calculator for configured single and consolidated bulletins, counting minutes and applying the night premium on the relevant rate, so generation paths cannot diverge. Equipment rental goes through the shared pure rental calculator (cheapest quoted period combination, partial days proportional to hours); never price equipment inline in generation code.
 
 - Keep application business data in the connected Neon database; the Cloud database is not a replacement for it.
