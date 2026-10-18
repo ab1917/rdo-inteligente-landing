@@ -1,12 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://qndffmktwtoezehbtnnf.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuZGZmbWt0d3RvZXplaGJ0bm5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyMzU0MjgsImV4cCI6MjA2MjgxMTQyOH0.gFAixD_8EIME94jXhBnKBeeeTtx4PKexBKZ_Ga2WKq4';
-
-export const SUPABASE_URL = supabaseUrl;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 // Untyped client to avoid schema drift between DB and generated types.
 export const supabase = createClient(supabaseUrl, supabaseKey);
+export const SUPABASE_URL = supabaseUrl;
 
 export type ConnectivityStatus = 'ok' | 'unreachable' | 'unauthorized' | 'error';
 
@@ -18,7 +17,7 @@ export interface ConnectivityResult {
 }
 
 /**
- * Verifica se o endpoint de autenticação do Supabase está alcançável
+ * Verifica se o endpoint de autenticação está alcançável
  * (DNS resolvendo, projeto ativo e chave anônima aceita).
  */
 export const checkSupabaseConnectivity = async (
@@ -43,7 +42,7 @@ export const checkSupabaseConnectivity = async (
         status: 'unauthorized',
         url: supabaseUrl,
         httpStatus: response.status,
-        message: `O servidor respondeu ${response.status}: a chave anônima (anon key) parece inválida ou expirada para o projeto ${supabaseUrl}.`,
+        message: `O servidor respondeu ${response.status}: a chave de acesso parece inválida ou expirada.`,
       };
     }
 
@@ -51,7 +50,7 @@ export const checkSupabaseConnectivity = async (
       status: 'error',
       url: supabaseUrl,
       httpStatus: response.status,
-      message: `O servidor de autenticação respondeu com erro ${response.status}. Verifique se o projeto ${supabaseUrl} está ativo (não pausado).`,
+      message: `O servidor de autenticação respondeu com erro ${response.status}.`,
     };
   } catch (err) {
     const aborted = (err as Error)?.name === 'AbortError';
@@ -59,8 +58,8 @@ export const checkSupabaseConnectivity = async (
       status: 'unreachable',
       url: supabaseUrl,
       message: aborted
-        ? `Tempo esgotado (${timeoutMs / 1000}s) ao contatar ${supabaseUrl}. O projeto pode estar pausado ou bloqueado pela rede.`
-        : `Não foi possível resolver/alcançar ${supabaseUrl}. Causas comuns: projeto pausado ou removido, URL incorreta, DNS/firewall bloqueando o domínio.`,
+        ? `Tempo esgotado (${timeoutMs / 1000}s) ao contatar o servidor de autenticação.`
+        : 'Não foi possível alcançar o servidor de autenticação. Verifique sua conexão com a internet.',
     };
   } finally {
     clearTimeout(timer);
