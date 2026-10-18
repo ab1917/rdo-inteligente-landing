@@ -1,5 +1,7 @@
 # Neon migration
 
+- [ ] Format RDO print/PDF after the uploaded model and visually verify the generated document.
+
 - [x] Correct RDO detail navigation at `/rdo/:id` and verify the existing report link (authenticated direct access, list link, report and missing record checked).
 
 - [x] Verify Neon schema, existing data and credential path (17 application tables, 2 companies, no application users or auth accounts).
