@@ -51,6 +51,12 @@ All colors MUST be HSL.
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.5rem;
+    --document-paper: 0 0% 100%;
+    --document-ink: 0 0% 10%;
+    --document-border: 0 0% 25%;
+    --document-heading: 0 0% 86%;
+    --document-highlight: 60 90% 85%;
+    --document-total: 95 35% 75%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -119,12 +125,74 @@ All colors MUST be HSL.
 }
 
 /* ===== Impressão / exportação PDF (RDO, Boletim de Medição etc.) ===== */
+.rdo-document { display: none; }
+
+/* Technical document palette remains independent of the application's theme. */
+.rdo-document {
+  color: hsl(var(--document-ink));
+  background: hsl(var(--document-paper));
+  font-family: Arial, sans-serif;
+  font-size: 9pt;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+.rdo-document * { box-sizing: border-box; }
+.rdo-document-sheet { border: 1px solid hsl(var(--document-border)); }
+.rdo-document h1, .rdo-document h2, .rdo-document h3, .rdo-document p { margin: 0; }
+.rdo-document h1 { font-size: 14pt; text-align: center; }
+.rdo-document h2, .rdo-document h3 {
+  padding: 5px 7px;
+  border-bottom: 1px solid hsl(var(--document-border));
+  font-size: 8pt;
+  font-weight: bold;
+  text-align: center;
+  background: hsl(var(--document-heading));
+}
+.rdo-document h3 { background: hsl(var(--document-highlight)); }
+.rdo-document-heading { display: grid; grid-template-columns: 1fr 1.5fr 1fr; align-items: stretch; border-bottom: 1px solid hsl(var(--document-border)); }
+.rdo-document-heading > * { padding: 12px 8px; display: flex; align-items: center; justify-content: center; overflow-wrap: anywhere; }
+.rdo-document-heading > * + * { border-left: 1px solid hsl(var(--document-border)); }
+.rdo-document-brand { font-size: 9pt; font-weight: bold; text-align: center; }
+.rdo-document-table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 8pt; }
+.rdo-document-table th, .rdo-document-table td { border: 1px solid hsl(var(--document-border)); padding: 5px 6px; overflow-wrap: anywhere; vertical-align: top; }
+.rdo-document-table th { font-size: 7pt; background: hsl(var(--document-heading)); font-weight: bold; }
+.rdo-document-identification th { width: 14%; }
+.rdo-document-conditions { text-align: center; }
+.rdo-document-columns { display: grid; grid-template-columns: 58% 42%; }
+.rdo-document-services { border-right: 1px solid hsl(var(--document-border)); }
+.rdo-document-text { padding: 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rdo-document-text p + p { margin-top: 4px; }
+.rdo-document-activity { margin-bottom: 10px; break-inside: avoid; }
+.rdo-document-activity:last-child { margin-bottom: 0; }
+.rdo-document-total th, .rdo-document-total td { background: hsl(var(--document-total)); font-weight: bold; }
+.rdo-document-comments { min-height: 65px; }
+.rdo-document-verification { margin-top: 12px; border-top: 1px solid hsl(var(--document-border)); break-inside: avoid; }
+.rdo-document-signature-head { display: grid; grid-template-columns: 2fr 1fr; text-align: center; background: hsl(var(--document-highlight)); font-size: 7pt; font-weight: bold; border-bottom: 1px solid hsl(var(--document-border)); }
+.rdo-document-signature-head span { padding: 4px; }
+.rdo-document-signature-head span + span { border-left: 1px solid hsl(var(--document-border)); }
+.rdo-document-signatures { display: grid; grid-template-columns: repeat(3, 1fr); }
+.rdo-document-signatures > div { padding: 35px 10px 10px; text-align: center; font-size: 7pt; }
+.rdo-document-signatures > div + div { border-left: 1px solid hsl(var(--document-border)); }
+.rdo-document-signatures span { display: block; min-height: 16px; border-bottom: 1px solid hsl(var(--document-border)); margin: 0 5px 5px; }
+.rdo-document-photo-sheet { break-before: page; }
+.rdo-document-photos { display: grid; grid-template-columns: repeat(2, 1fr); }
+.rdo-document-photos figure { margin: 0; padding: 8px; border: 1px solid hsl(var(--document-border)); break-inside: avoid; }
+.rdo-document-photo { height: 65mm; display: flex; align-items: center; justify-content: center; }
+.rdo-document-photo img { width: 100%; height: 100%; object-fit: contain; }
+.rdo-document-photos figcaption { margin-top: 6px; font-size: 8pt; text-align: center; overflow-wrap: anywhere; }
+.rdo-document-photos figcaption span { display: block; font-size: 7pt; margin-top: 3px; }
+
 @page {
   size: A4;
   margin: 12mm;
 }
 
 @media print {
+  .rdo-document { display: block; width: 185mm; max-width: 100%; }
+  .rdo-document-sheet, .rdo-document section { break-inside: auto; }
+  body:has(.rdo-document) { background: hsl(var(--document-paper)); }
+  body:has(.rdo-document) main { min-width: 0; }
+  body:has(.rdo-document) [data-sidebar="sidebar"] { display: none !important; }
   * {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;

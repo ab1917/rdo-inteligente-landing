@@ -15,7 +15,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <AppSidebar />
         </div>
 
-        <div className="flex-1 flex flex-col">
+        <div className="min-w-0 flex-1 flex flex-col">
           <div className="print:hidden">
             <AppHeader />
           </div>
