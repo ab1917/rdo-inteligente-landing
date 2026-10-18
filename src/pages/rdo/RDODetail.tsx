@@ -14,7 +14,7 @@ export function RDODetail() {
     return <div className="flex justify-center py-16" role="status" aria-label="Carregando RDO"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
-  const back = <Button variant="ghost" asChild><Link to="/rdo"><ArrowLeft className="mr-2 h-4 w-4" />Voltar para RDOs</Link></Button>;
+  const back = <Button variant="ghost" className="print:hidden" asChild><Link to="/rdo"><ArrowLeft className="mr-2 h-4 w-4" />Voltar para RDOs</Link></Button>;
 
   if (!rdo) {
     return <div className="space-y-6">{back}<h1 className="text-2xl font-bold">RDO não encontrado</h1><p className="text-muted-foreground">O relatório solicitado não está disponível.</p></div>;
