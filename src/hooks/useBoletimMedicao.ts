@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { BoletimMedicao, FuncionarioBoletim, EquipamentoBoletim, MaterialBoletim, ResumoFinanceiro, ClassificacaoHH, RDO, Funcionario } from '@/types';
 import { getStorageData, setStorageData } from '@/services/mockData';
+import { buildConfiguredBoletim } from '@/services/configuredBoletim';
+import type { MeasurementConfig } from '@/services/measurementConfig';
 
 export const useBoletimMedicao = () => {
   const [boletins, setBoletins] = useState<BoletimMedicao[]>([]);
@@ -91,8 +93,18 @@ export const useBoletimMedicao = () => {
   };
 
   // Gerar boletim de medição a partir do RDO
-  const gerarBoletimDeRDO = useCallback(async (rdo: RDO): Promise<BoletimMedicao> => {
+  const gerarBoletimDeRDO = useCallback(async (rdo: RDO, config?: MeasurementConfig): Promise<BoletimMedicao> => {
     setLoading(true);
+
+    if (config) {
+      try {
+        const novo = buildConfiguredBoletim([rdo], config, rdo.obra, rdo.data, rdo.data);
+        const updated = [...getStorageData<BoletimMedicao[]>('boletins_medicao', []), novo];
+        setStorageData('boletins_medicao', updated);
+        setBoletins(updated);
+        return novo;
+      } finally { setLoading(false); }
+    }
 
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -248,9 +260,20 @@ export const useBoletimMedicao = () => {
     rdos: RDO[], 
     obra: string, 
     dataInicio: string, 
-    dataFim: string
+    dataFim: string,
+    config?: MeasurementConfig
   ): Promise<BoletimMedicao> => {
     setLoading(true);
+
+    if (config) {
+      try {
+        const novo = buildConfiguredBoletim(rdos, config, obra, dataInicio, dataFim);
+        const updated = [...getStorageData<BoletimMedicao[]>('boletins_medicao', []), novo];
+        setStorageData('boletins_medicao', updated);
+        setBoletins(updated);
+        return novo;
+      } finally { setLoading(false); }
+    }
 
     return new Promise((resolve) => {
       setTimeout(() => {

@@ -69,7 +69,7 @@ export function validateMeasurementConfig(config: MeasurementConfig): void {
     if (day.mode !== 'normal') continue;
     if (!day.periods.length) throw new Error('Informe a entrada e a saída dos dias normais.');
     const ranges = periodRanges(day.periods);
-    if (ranges.some(([start, end]) => end - start >= 1440) || (ranges.at(-1)?.[1] ?? 0) - ranges[0][0] > 1440) throw new Error('Revise os intervalos da jornada; há sobreposição ou duração superior a 24 horas.');
+    if (ranges.some(([start, end]) => end - start >= 1440) || ranges[ranges.length - 1][1] - ranges[0][0] > 1440) throw new Error('Revise os intervalos da jornada; há sobreposição ou duração superior a 24 horas.');
   }
   for (const value of [config.overtime60, config.overtime100, config.nightPercent]) {
     if (!Number.isFinite(value) || value < 0 || value > 500) throw new Error('Informe adicionais entre 0% e 500%.');
