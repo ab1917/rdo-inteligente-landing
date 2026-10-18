@@ -188,7 +188,7 @@ All colors MUST be HSL.
 }
 
 @media print {
-  .rdo-document { display: block; }
+  .rdo-document { display: block; width: 185mm; max-width: 100%; }
   .rdo-document-sheet, .rdo-document section { break-inside: auto; }
   body:has(.rdo-document) { background: hsl(var(--document-paper)); }
   body:has(.rdo-document) main { min-width: 0; }
