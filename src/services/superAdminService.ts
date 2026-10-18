@@ -50,16 +50,16 @@ export const superAdminService = {
       const totalUsers = (users as any[] | null)?.length || 0;
 
       // Calculate plan distribution
-      const planDistribution = companies?.reduce((acc, company) => {
+      const planDistribution = companyRows.reduce((acc, company) => {
         acc[company.plan as keyof typeof acc] = (acc[company.plan as keyof typeof acc] || 0) + 1;
         return acc;
       }, { starter: 0, professional: 0, enterprise: 0 }) || { starter: 0, professional: 0, enterprise: 0 };
 
       // Mock revenue calculation (in a real app, this would come from subscriptions table)
       const planPrices = { starter: 297, professional: 597, enterprise: 1297 };
-      const totalRevenue = companies?.reduce((acc, company) => {
-        return acc + planPrices[company.plan as keyof typeof planPrices];
-      }, 0) || 0;
+      const totalRevenue = companyRows.reduce((acc, company) => {
+        return acc + (planPrices[company.plan as keyof typeof planPrices] || 0);
+      }, 0);
 
       return {
         totalCompanies,
