@@ -2,7 +2,7 @@
 
 - [x] Configure per-bulletin labor tariffs and seven editable weekly schedules from the uploaded references; validate actual minutes, breaks and cumulative night premium. Authenticated generation with existing RDO and list readback verified; 29 rule tests pass.
 - [ ] Persist shared company/contract measurement settings in Neon. Blocked: authenticated Neon module migration and Auth Base URL.
-- [ ] Apply uploaded equipment rental tariffs. Blocked: decision on daily/weekly/fortnightly/monthly billing units and partial-period rules; existing equipment/material calculations unchanged.
+- [x] Apply uploaded equipment rental tariffs: cheapest period combination (month/fortnight/week/day) with partial days proportional to hours (diária ÷ 8h); editable in the Locação tab; 12 rental rule tests pass.
 
 - [x] Format RDO print/PDF after the uploaded model; verify authenticated detail and both PDF pages, with explicit unavailable-photo labels for broken source images.
 
