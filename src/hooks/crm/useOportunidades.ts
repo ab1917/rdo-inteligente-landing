@@ -1,63 +1,9 @@
-import { useState, useCallback } from 'react';
 import { OportunidadeExpandida } from '@/types';
-import { getStorageData, setStorageData } from '@/services/mockData';
-
+import { useCommercialData } from '../useCommercialData';
 export const useOportunidades = () => {
-  const [oportunidades, setOportunidades] = useState<OportunidadeExpandida[]>([]);
-
-  const loadOportunidades = useCallback(() => {
-    setOportunidades(getStorageData('oportunidades', []));
-  }, []);
-
-  const createOportunidade = useCallback((oportunidadeData: Omit<OportunidadeExpandida, 'id' | 'data_criacao' | 'historico_acoes'>) => {
-    const newOportunidade: OportunidadeExpandida = {
-      ...oportunidadeData,
-      id: Date.now().toString(),
-      data_criacao: new Date().toISOString().split('T')[0],
-      historico_acoes: []
-    };
-    
-    const updatedOportunidades = [...oportunidades, newOportunidade];
-    setOportunidades(updatedOportunidades);
-    setStorageData('oportunidades', updatedOportunidades);
-    return newOportunidade;
-  }, [oportunidades]);
-
-  const updateOportunidade = useCallback((id: string, oportunidadeData: Partial<OportunidadeExpandida>) => {
-    const updatedOportunidades = oportunidades.map(oportunidade => 
-      oportunidade.id === id ? { ...oportunidade, ...oportunidadeData } : oportunidade
-    );
-    setOportunidades(updatedOportunidades);
-    setStorageData('oportunidades', updatedOportunidades);
-  }, [oportunidades]);
-
-  const convertLeadToOportunidade = useCallback((leadId: string, oportunidadeData: Omit<OportunidadeExpandida, 'id' | 'id_lead' | 'data_criacao' | 'historico_acoes'>) => {
-    const newOportunidade: OportunidadeExpandida = {
-      ...oportunidadeData,
-      id: Date.now().toString(),
-      id_lead: leadId,
-      data_criacao: new Date().toISOString().split('T')[0],
-      historico_acoes: [{
-        id: Date.now().toString(),
-        tipo: 'ligacao',
-        descricao: `Conversão de lead para oportunidade`,
-        data: new Date().toISOString().split('T')[0],
-        responsavel: oportunidadeData.responsavel_comercial,
-        resultado: 'Lead convertido em oportunidade'
-      }]
-    };
-
-    const updatedOportunidades = [...oportunidades, newOportunidade];
-    setOportunidades(updatedOportunidades);
-    setStorageData('oportunidades', updatedOportunidades);
-    return newOportunidade;
-  }, [oportunidades]);
-
-  return {
-    oportunidades,
-    loadOportunidades,
-    createOportunidade,
-    updateOportunidade,
-    convertLeadToOportunidade
-  };
+ const { oportunidades, mutate, reload } = useCommercialData();
+ const createOportunidade = async (data: Omit<OportunidadeExpandida,'id'|'data_criacao'|'historico_acoes'>) => { const result=await mutate<{document:OportunidadeExpandida}>({action:'save',entity:'oportunidades',id:crypto.randomUUID(),document:{...data,data_criacao:new Date().toISOString().slice(0,10),historico_acoes:[]}});return result.document; };
+ const updateOportunidade = async (id:string,data:Partial<OportunidadeExpandida>) => { const current=oportunidades.find(v=>v.id===id);if(!current) throw new Error('Oportunidade não encontrada.');return mutate({action:'save',entity:'oportunidades',id,document:{...current,...data}}); };
+ const convertLeadToOportunidade = (leadId:string,data:Omit<OportunidadeExpandida,'id'|'id_lead'|'data_criacao'|'historico_acoes'>) => createOportunidade({...data,id_lead:leadId});
+ return { oportunidades, loadOportunidades:reload, createOportunidade, updateOportunidade, convertLeadToOportunidade };
 };

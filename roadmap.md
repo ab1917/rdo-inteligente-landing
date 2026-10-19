@@ -15,5 +15,6 @@
 - [x] Establish working authentication: app now signs in via Lovable Cloud Auth (email/password enabled); companies, users and user_roles tables created with RLS.
 - [x] Recreate test accounts safely and verify signed-in workflows (admin/gestor/engenheiro @construtorademo.com.br created via seed-demo-users edge function; admin login verified end-to-end).
 - [ ] Migrate remaining CRM, bulletins and financial business records to Neon. Pending a separate continuation beyond the current RDO scope; existing Cloud login can be retained during this migration.
+- [ ] Add closed-scope measurement bulletins based on percentage delivery/progress, integrated with contracts and financial totals.
 - [ ] Switch authentication to Neon Auth. Blocked: Neon Auth Base URL must be supplied from the Neon console (Neon → Auth → Configuration).
 - [ ] Validate full CRM, measurement and financial consistency. Blocked: remaining module migration; RDO creation/readback and measurement RDO source are verified.

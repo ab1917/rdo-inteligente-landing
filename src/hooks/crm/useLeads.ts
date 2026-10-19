@@ -1,39 +1,8 @@
-import { useState, useCallback } from 'react';
 import { Lead } from '@/types';
-import { getStorageData, setStorageData } from '@/services/mockData';
-
+import { useCommercialData } from '../useCommercialData';
 export const useLeads = () => {
-  const [leads, setLeads] = useState<Lead[]>([]);
-
-  const loadLeads = useCallback(() => {
-    setLeads(getStorageData('leads', []));
-  }, []);
-
-  const createLead = useCallback((leadData: Omit<Lead, 'id' | 'data_criacao'>) => {
-    const newLead: Lead = {
-      ...leadData,
-      id: Date.now().toString(),
-      data_criacao: new Date().toISOString().split('T')[0]
-    };
-    
-    const updatedLeads = [...leads, newLead];
-    setLeads(updatedLeads);
-    setStorageData('leads', updatedLeads);
-    return newLead;
-  }, [leads]);
-
-  const updateLead = useCallback((id: string, leadData: Partial<Lead>) => {
-    const updatedLeads = leads.map(lead => 
-      lead.id === id ? { ...lead, ...leadData } : lead
-    );
-    setLeads(updatedLeads);
-    setStorageData('leads', updatedLeads);
-  }, [leads]);
-
-  return {
-    leads,
-    loadLeads,
-    createLead,
-    updateLead
-  };
+ const { leads, mutate, reload } = useCommercialData();
+ const createLead = async (data: Omit<Lead, 'id' | 'data_criacao'>) => { const result=await mutate<{document:Lead}>({action:'save',entity:'leads',id:crypto.randomUUID(),document:{...data,data_criacao:new Date().toISOString().slice(0,10)}});return result.document; };
+ const updateLead = async (id:string,data:Partial<Lead>) => { const current=leads.find(v=>v.id===id);if(!current) throw new Error('Lead não encontrado.');return mutate({action:'save',entity:'leads',id,document:{...current,...data}}); };
+ return { leads, loadLeads:reload, createLead, updateLead };
 };
