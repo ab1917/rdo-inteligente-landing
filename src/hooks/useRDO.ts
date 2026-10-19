@@ -1,74 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { RDO } from '@/types';
-import { getStorageData, setStorageData } from '@/services/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { listNeonRDOs, rdoRequest } from '@/services/neonRDO';
 
 export const useRDO = () => {
-  const [rdos, setRDOs] = useState<RDO[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const storedRDOs = getStorageData<RDO[]>('rdos', []);
-      setRDOs(storedRDOs);
-      setLoading(false);
-    }, 500);
-  }, []);
+  const { user, isLoading } = useAuth();
+  const client = useQueryClient();
+  const queryKey = ['neon-rdos', user?.company_id, user?.id];
+  const query = useQuery({ queryKey, queryFn: listNeonRDOs, enabled: !!user, staleTime: 60000, retry: false });
+  const rdos = user ? query.data ?? [] : [];
 
   const createRDO = async (rdo: Omit<RDO, 'id' | 'createdAt' | 'updatedAt'>): Promise<RDO> => {
-    setLoading(true);
-    
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newRDO: RDO = {
-          ...rdo,
-          id: Date.now().toString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        
-        const updatedRDOs = [...rdos, newRDO];
-        setRDOs(updatedRDOs);
-        setStorageData('rdos', updatedRDOs);
-        setLoading(false);
-        resolve(newRDO);
-      }, 1000);
-    });
+    const result = await rdoRequest<{ rdo: RDO }>({ method: 'POST', body: { action: 'create', id: crypto.randomUUID(), rdo } });
+    await client.invalidateQueries({ queryKey });
+    return result.rdo;
   };
 
   const updateRDO = async (id: string, updates: Partial<RDO>): Promise<RDO | null> => {
-    setLoading(true);
-    
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const updatedRDOs = rdos.map(rdo => 
-          rdo.id === id 
-            ? { ...rdo, ...updates, updatedAt: new Date().toISOString() }
-            : rdo
-        );
-        
-        setRDOs(updatedRDOs);
-        setStorageData('rdos', updatedRDOs);
-        
-        const updatedRDO = updatedRDOs.find(rdo => rdo.id === id) || null;
-        setLoading(false);
-        resolve(updatedRDO);
-      }, 800);
-    });
+    const current = rdos.find(rdo => rdo.id === id);
+    if (!current) return null;
+    const result = await rdoRequest<{ rdo: RDO }>({ method: 'POST', body: { action: 'update', id, rdo: { ...current, ...updates } } });
+    await client.invalidateQueries({ queryKey });
+    return result.rdo;
   };
 
   const deleteRDO = async (id: string): Promise<void> => {
-    setLoading(true);
-    
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const updatedRDOs = rdos.filter(rdo => rdo.id !== id);
-        setRDOs(updatedRDOs);
-        setStorageData('rdos', updatedRDOs);
-        setLoading(false);
-        resolve();
-      }, 500);
-    });
+    await rdoRequest({ method: 'POST', body: { action: 'delete', id } });
+    await client.invalidateQueries({ queryKey });
   };
 
   const getRDOById = (id: string): RDO | undefined => {
@@ -77,7 +35,9 @@ export const useRDO = () => {
 
   return {
     rdos,
-    loading,
+    loading: isLoading || (!!user && query.isPending),
+    error: query.error?.message ?? '',
+    reload: query.refetch,
     createRDO,
     updateRDO,
     deleteRDO,
