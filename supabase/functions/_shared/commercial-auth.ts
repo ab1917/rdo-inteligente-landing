@@ -9,12 +9,12 @@ export async function commercialIdentity(req: Request) {
   const auth = createClient(url, key, { global: { headers: { Authorization: header } }, auth: { persistSession: false, autoRefreshToken: false } });
   const { data: { user }, error } = await auth.auth.getUser();
   if (error || !user?.email) throw new RequestError('Sessão inválida.', 401);
-  const identity = await neonQuery('select id, company_id, name from public.users where email = $1 and status = $2 limit 1', [user.email, 'ativo']);
+  const identity = await neonQuery('select id, company_id, nome from public.users where email = $1 and status = $2 limit 1', [user.email, 'ativo']);
   const row = identity.rows[0];
   if (!row?.company_id) throw new RequestError('Usuário sem empresa vinculada no Neon.', 403);
   const { data: roles, error: roleError } = await auth.from('user_roles').select('role').eq('user_id', user.id);
   if (roleError) throw new RequestError('Não foi possível verificar suas permissões.', 403);
-  return { company: String(row.company_id), userId: user.id, name: String(row.name || user.email), roles: (roles ?? []).map(r => String(r.role)) };
+  return { company: String(row.company_id), userId: user.id, name: String(row.nome || user.email), roles: (roles ?? []).map(r => String(r.role)) };
 }
 export function requireCommercialWrite(roles: string[], approval = false) {
   const allowed = approval ? ['admin', 'manager', 'super_admin'] : ['admin', 'manager', 'engineer', 'super_admin'];
