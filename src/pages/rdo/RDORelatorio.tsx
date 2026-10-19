@@ -13,7 +13,7 @@ import { StatusBadge } from '@/components/rdo/StatusBadge';
 
 export function RDORelatorio() {
   const { id } = useParams();
-  const { getRDOById, loading } = useRDO();
+  const { getRDOById, loading, error, reload } = useRDO();
   
   const rdo = id ? getRDOById(id) : undefined;
 
@@ -21,6 +21,7 @@ export function RDORelatorio() {
     return <div className="flex justify-center py-16" role="status" aria-label="Carregando relatório"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
+  if (error) return <div role="alert" className="space-y-4"><p className="text-destructive">{error}</p><Button onClick={() => reload()}>Tentar novamente</Button></div>;
   if (!rdo) {
     return (
       <div className="space-y-6">

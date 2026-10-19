@@ -25,7 +25,7 @@ import {
   Wrench,
   AlertTriangle
 } from 'lucide-react';
-import { mockObras, mockFuncionarios } from '@/services/mockData';
+import { encodeRDOPhoto } from '@/services/rdoPhotos';
 import { RDO, Equipamento, Ocorrencia } from '@/types';
 import { PhotoUpload } from '@/components/rdo/PhotoUpload';
 import { RDOValidations } from '@/components/rdo/RDOValidations';
@@ -35,6 +35,8 @@ import { StatusBadge } from '@/components/rdo/StatusBadge';
 
 const rdoSchema = z.object({
   obra: z.string().min(1, 'Selecione uma obra'),
+  cliente: z.string().min(1, 'Informe o cliente'),
+  local: z.string().min(1, 'Informe o local'),
   data: z.string().min(1, 'Data é obrigatória'),
   responsavel: z.string().min(1, 'Responsável é obrigatório'),
   clima: z.enum(['sol', 'chuva', 'nublado', 'vento']),
@@ -49,6 +51,7 @@ const rdoSchema = z.object({
   })).min(1, 'Adicione pelo menos uma atividade'),
   equipes: z.array(z.object({
     funcionario: z.string().min(1, 'Selecione um funcionário'),
+    cargo: z.string().min(1, 'Informe a função'),
     horaInicio: z.string().min(1, 'Hora de início é obrigatória'),
     horaFim: z.string().min(1, 'Hora de fim é obrigatória')
   })).min(1, 'Adicione pelo menos um membro da equipe'),
@@ -85,11 +88,14 @@ export function CreateRDO() {
   const [rdoStatus, setRdoStatus] = useState<RDO['status']>('rascunho');
   const [boletimGerado, setBoletimGerado] = useState(null);
   const [activeTab, setActiveTab] = useState('basico');
+  const [saving, setSaving] = useState(false);
 
   const form = useForm<RDOFormData>({
     resolver: zodResolver(rdoSchema),
     defaultValues: {
       obra: '',
+      cliente: '',
+      local: '',
       data: new Date().toISOString().split('T')[0],
       responsavel: '',
       clima: 'sol',
@@ -104,6 +110,7 @@ export function CreateRDO() {
       }],
       equipes: [{
         funcionario: '',
+        cargo: '',
         horaInicio: '07:00',
         horaFim: '17:00'
       }],
@@ -158,8 +165,8 @@ export function CreateRDO() {
         id: 'temp-' + Date.now(),
         tipo: 'obra_civil' as const,
         obra: formData.obra,
-        cliente: mockObras.find(o => o.nome === formData.obra)?.cliente || 'Cliente',
-        local: mockObras.find(o => o.nome === formData.obra)?.endereco || 'Local',
+        cliente: formData.cliente,
+        local: formData.local,
         data: formData.data,
         responsavel: formData.responsavel,
         clima: formData.clima,
@@ -179,7 +186,7 @@ export function CreateRDO() {
         equipes: formData.equipes.map((eq, i) => ({
           id: (i + 1).toString(),
           funcionario: eq.funcionario,
-          cargo: mockFuncionarios.find(f => f.nome === eq.funcionario)?.cargo || '',
+          cargo: eq.cargo,
           horaInicio: eq.horaInicio,
           horaFim: eq.horaFim,
           horasTrabalhadas: calcularHoras(eq.horaInicio, eq.horaFim)
@@ -218,12 +225,14 @@ export function CreateRDO() {
   };
 
   const onSubmit = async (data: RDOFormData) => {
+    if (saving) return;
+    setSaving(true);
     try {
       const rdoData: Omit<RDO, 'id' | 'createdAt' | 'updatedAt'> = {
         tipo: 'obra_civil' as const,
         obra: data.obra,
-        cliente: mockObras.find(o => o.nome === data.obra)?.cliente || 'Cliente Padrão',
-        local: mockObras.find(o => o.nome === data.obra)?.endereco || 'Local Padrão',
+        cliente: data.cliente,
+        local: data.local,
         data: data.data,
         responsavel: data.responsavel,
         // Dados de HH e controle - valores padrão para novo RDO
@@ -256,15 +265,17 @@ export function CreateRDO() {
           funcionario: equipe.funcionario,
           horaInicio: equipe.horaInicio,
           horaFim: equipe.horaFim,
-          cargo: mockFuncionarios.find(f => f.nome === equipe.funcionario)?.cargo || '',
+          cargo: equipe.cargo,
           horasTrabalhadas: calcularHoras(equipe.horaInicio, equipe.horaFim)
         })),
-        fotos: photos.map((photo, index) => ({
+        equipamentos: (data.equipamentos ?? []).map((eq, index) => ({ ...eq, id: String(index + 1), categoria: 'obra_civil', status: 'em_uso', horasUsadas: calcularHoras(eq.horaInicio, eq.horaFim) })),
+        ocorrencias: (data.ocorrencias ?? []).map((oc, index) => ({ ...oc, id: String(index + 1), categoria: 'seguranca', timestamp: new Date().toISOString(), status_resolucao: 'aberta' })),
+        fotos: await Promise.all(photos.map(async (photo, index) => ({
           id: (index + 1).toString(),
-          url: URL.createObjectURL(photo),
+          url: await encodeRDOPhoto(photo),
           descricao: `Foto ${index + 1}`,
           timestamp: new Date().toISOString()
-        }))
+        })))
       };
 
       await createRDO(rdoData);
@@ -278,10 +289,10 @@ export function CreateRDO() {
     } catch (error) {
       toast({
         title: 'Erro ao criar RDO',
-        description: 'Tente novamente em alguns instantes.',
+        description: error instanceof Error ? error.message : 'Tente novamente em alguns instantes.',
         variant: 'destructive'
       });
-    }
+    } finally { setSaving(false); }
   };
 
   return (
@@ -314,25 +325,14 @@ export function CreateRDO() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Obra</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione uma obra" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {mockObras.map((obra) => (
-                            <SelectItem key={obra.id} value={obra.nome}>
-                              {obra.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl><Input placeholder="Nome da obra" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                <FormField control={form.control} name="cliente" render={({ field }) => <FormItem><FormLabel>Cliente</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                <FormField control={form.control} name="local" render={({ field }) => <FormItem><FormLabel>Local da obra</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                 <FormField
                   control={form.control}
                   name="data"
@@ -553,6 +553,7 @@ export function CreateRDO() {
                   size="sm"
                   onClick={() => appendEquipe({
                     funcionario: '',
+                    cargo: '',
                     horaInicio: '07:00',
                     horaFim: '17:00'
                   })}
@@ -571,20 +572,7 @@ export function CreateRDO() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Funcionário</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {mockFuncionarios.map((funcionario) => (
-                              <SelectItem key={funcionario.id} value={funcionario.nome}>
-                                {funcionario.nome} - {funcionario.cargo}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl><Input {...field} placeholder="Nome do funcionário" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -923,7 +911,7 @@ export function CreateRDO() {
                 equipes={form.watch('equipes').map((equipe, index) => ({
                   id: (index + 1).toString(),
                   funcionario: equipe.funcionario,
-                  cargo: mockFuncionarios.find(f => f.nome === equipe.funcionario)?.cargo || '',
+                  cargo: equipe.cargo,
                   horaInicio: equipe.horaInicio,
                   horaFim: equipe.horaFim,
                   horasTrabalhadas: calcularHoras(equipe.horaInicio, equipe.horaFim)
@@ -988,8 +976,8 @@ export function CreateRDO() {
                 {loadingBoletim ? 'Gerando...' : 'Gerar Boletim'}
               </Button>
             )}
-            <Button type="submit" disabled={loading}>
-              {loading ? (
+            <Button type="submit" disabled={loading || saving}>
+              {saving ? (
                 <>Salvando...</>
               ) : (
                 <>
