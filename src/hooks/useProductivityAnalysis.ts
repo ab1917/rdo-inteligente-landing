@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RDO, Funcionario } from '@/types';
+import { Funcionario } from '@/types';
 import { getStorageData } from '@/services/mockData';
 import { useRDO } from './useRDO';
 

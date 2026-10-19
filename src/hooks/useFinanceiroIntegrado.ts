@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ContratoIntegrado, BoletimMedicao, RDO, AnaliseFinanceira, ConsolidadoFinanceiro } from '@/types';
+import { ContratoIntegrado, BoletimMedicao, AnaliseFinanceira, ConsolidadoFinanceiro } from '@/types';
 import { getStorageData } from '@/services/mockData';
 import { useRDO } from './useRDO';
 

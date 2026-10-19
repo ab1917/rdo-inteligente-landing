@@ -1,6 +1,6 @@
 # Neon migration
 
-- [ ] Move RDO reads and writes to authenticated company-scoped Neon operations and verify creation and reload in the preview.
+- [x] Move RDO reads and writes to authenticated company-scoped Neon operations; verified form creation, persisted photo, list/detail reload and measurement work selector. Shared RDO readers no longer use localStorage; 46 tests pass. An explicitly labeled integration-test RDO remains in the demo company.
 
 - [x] Configure per-bulletin labor tariffs and seven editable weekly schedules from the uploaded references; validate actual minutes, breaks and cumulative night premium. Authenticated generation with existing RDO and list readback verified; 29 rule tests pass.
 - [x] Persist shared company measurement settings in Neon: `measurement_settings` table, authenticated `neon-measurement-settings` edge function (company resolved server-side by user email), save/load verified end-to-end in the preview.
@@ -14,5 +14,6 @@
 - [x] Enable Lovable Cloud for protected server operations; retain Neon as the business database.
 - [x] Establish working authentication: app now signs in via Lovable Cloud Auth (email/password enabled); companies, users and user_roles tables created with RLS.
 - [x] Recreate test accounts safely and verify signed-in workflows (admin/gestor/engenheiro @construtorademo.com.br created via seed-demo-users edge function; admin login verified end-to-end).
-- [ ] Migrate module reads and writes to authenticated Neon server operations. Blocked: Neon Auth Base URL must be supplied from the Neon console (Neon → Auth → Configuration).
-- [ ] Validate CRM, RDO, measurement and financial consistency. Blocked: authenticated module migration.
+- [ ] Migrate remaining CRM, bulletins and financial business records to Neon. Pending a separate continuation beyond the current RDO scope; existing Cloud login can be retained during this migration.
+- [ ] Switch authentication to Neon Auth. Blocked: Neon Auth Base URL must be supplied from the Neon console (Neon → Auth → Configuration).
+- [ ] Validate full CRM, measurement and financial consistency. Blocked: remaining module migration; RDO creation/readback and measurement RDO source are verified.

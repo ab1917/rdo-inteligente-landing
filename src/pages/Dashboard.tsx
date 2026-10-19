@@ -61,15 +61,6 @@ export const Dashboard = () => {
     { nome: 'Conjunto Habitacional', progresso: 78, prazo: '22 dias', status: 'no-prazo' }
   ];
 
-  const getStatusBadge = (status: string) => {
-    const styles = {
-      'Aprovado': 'bg-green-100 text-green-800',
-      'Pendente': 'bg-yellow-100 text-yellow-800',
-      'Rascunho': 'bg-gray-100 text-gray-800'
-    };
-    return styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800';
-  };
-
   const getStatusIcon = (status: string) => {
     switch(status) {
       case 'no-prazo': return <CheckCircle className="h-4 w-4 text-green-600" />;

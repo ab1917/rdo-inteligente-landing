@@ -3,6 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { neonQuery, neonExecute, neonUserError, type NeonResult } from '../_shared/neon-gateway.ts';
 import { requestSchema } from './validation.ts';
 import { canWriteRDO, canApproveRDO } from './permissions.ts';
+import { z } from 'npm:zod@3';
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 const select = `select d.document, r.id, to_json(r.created_at) as created_iso, to_json(r.updated_at) as updated_iso
@@ -27,8 +28,8 @@ Deno.serve(async req => {
     if (req.method === 'GET') {
       const params = new URL(req.url).searchParams;
       const before = params.get('before');
-      if (Array.from(params.keys()).some(k => k !== 'before') || (before && !/^\d{4}-\d{2}-\d{2}T.*Z\|[a-f0-9-]{36}$/.test(before))) return json({ error: 'Paginação inválida.' }, 400);
       const [timestamp, cursorId] = before?.split('|') ?? [];
+      if (Array.from(params.keys()).some(k => k !== 'before') || (before && (!z.string().datetime().safeParse(timestamp).success || !z.string().uuid().safeParse(cursorId).success || before.split('|').length !== 2))) return json({ error: 'Paginação inválida.' }, 400);
       const result = await neonQuery(`${select} where d.company_id = $1 ${before ? 'and (r.created_at, r.id) < ($2::timestamptz, $3::uuid)' : ''} order by r.created_at desc, r.id desc limit 100`, before ? [company, timestamp, cursorId] : [company]);
       const last = result.rows[result.rows.length - 1];
       return json({ rdos: result.rows.map(toRDO), next: result.rows.length === 100 && last ? `${last.created_iso}|${last.id}` : null });
@@ -45,6 +46,12 @@ Deno.serve(async req => {
     const { data: roleRows, error: roleError } = await auth.from('user_roles').select('role').eq('user_id', user.id);
     if (roleError || !canWriteRDO((roleRows ?? []).map(r => r.role))) return json({ error: 'Sem permissão para alterar RDOs.' }, 403);
     const input = parsed.data;
+    if (input.action !== 'create') {
+      const existing = await neonQuery('select document from public.rdo_documents where company_id = $1 and rdo_id = $2 limit 1', [company, input.id]);
+      if (!existing.rows.length) return json({ error: 'RDO não encontrado.' }, 404);
+      const document = existing.rows[0].document as { status: string };
+      if (document.status === 'aprovado' && !canApproveRDO((roleRows ?? []).map(r => r.role))) return json({ error: 'Sem permissão para alterar um RDO aprovado.' }, 403);
+    }
     if (input.action === 'delete') {
       const removed = await neonExecute('delete from public.rdos r using public.rdo_documents d where r.id = d.rdo_id and d.company_id = $1 and r.id = $2 returning r.id', [company, input.id]);
       return removed.rows.length ? json({ ok: true }) : json({ error: 'RDO não encontrado.' }, 404);
