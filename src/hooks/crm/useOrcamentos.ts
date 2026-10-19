@@ -1,56 +1,9 @@
-import { useState, useCallback } from 'react';
 import { OrcamentoIntegrado } from '@/types';
-import { getStorageData, setStorageData } from '@/services/mockData';
-
+import { useCommercialData } from '../useCommercialData';
 export const useOrcamentos = () => {
-  const [orcamentos, setOrcamentos] = useState<OrcamentoIntegrado[]>([]);
-
-  const loadOrcamentos = useCallback(() => {
-    setOrcamentos(getStorageData('orcamentos', []));
-  }, []);
-
-  const createOrcamento = useCallback((orcamentoData: Omit<OrcamentoIntegrado, 'id' | 'data_criacao'>) => {
-    const newOrcamento: OrcamentoIntegrado = {
-      ...orcamentoData,
-      id: Date.now().toString(),
-      data_criacao: new Date().toISOString().split('T')[0]
-    };
-    
-    const updatedOrcamentos = [...orcamentos, newOrcamento];
-    setOrcamentos(updatedOrcamentos);
-    setStorageData('orcamentos', updatedOrcamentos);
-    return newOrcamento;
-  }, [orcamentos]);
-
-  const updateOrcamento = useCallback((id: string, orcamentoData: Partial<OrcamentoIntegrado>) => {
-    const updatedOrcamentos = orcamentos.map(orcamento => 
-      orcamento.id === id ? { ...orcamento, ...orcamentoData } : orcamento
-    );
-    setOrcamentos(updatedOrcamentos);
-    setStorageData('orcamentos', updatedOrcamentos);
-  }, [orcamentos]);
-
-  const approveOrcamento = useCallback((orcamentoId: string) => {
-    const updatedOrcamentos = orcamentos.map(orcamento =>
-      orcamento.id === orcamentoId
-        ? { 
-            ...orcamento, 
-            status: 'aprovado' as const,
-            aprovado_comercial: true,
-            aprovado_tecnico: true,
-            data_aprovacao: new Date().toISOString().split('T')[0]
-          }
-        : orcamento
-    );
-    setOrcamentos(updatedOrcamentos);
-    setStorageData('orcamentos', updatedOrcamentos);
-  }, [orcamentos]);
-
-  return {
-    orcamentos,
-    loadOrcamentos,
-    createOrcamento,
-    updateOrcamento,
-    approveOrcamento
-  };
+ const { orcamentos, mutate, reload } = useCommercialData();
+ const createOrcamento = async (data:Omit<OrcamentoIntegrado,'id'|'data_criacao'>) => { const result=await mutate<{document:OrcamentoIntegrado}>({action:'save',entity:'orcamentos',id:crypto.randomUUID(),document:{...data,data_criacao:new Date().toISOString().slice(0,10)}});return result.document; };
+ const updateOrcamento = async (id:string,data:Partial<OrcamentoIntegrado>) => { const current=orcamentos.find(v=>v.id===id);if(!current)throw new Error('Orçamento não encontrado.');return mutate({action:'save',entity:'orcamentos',id,document:{...current,...data}}); };
+ const approveOrcamento = (id:string) => updateOrcamento(id,{status:'aprovado',aprovado_comercial:true,aprovado_tecnico:true});
+ return { orcamentos, loadOrcamentos:reload, createOrcamento, updateOrcamento, approveOrcamento };
 };
