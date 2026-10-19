@@ -10,8 +10,8 @@ export const useRDO = () => {
   const query = useQuery({ queryKey, queryFn: listNeonRDOs, enabled: !!user, staleTime: 60000, retry: false });
   const rdos = user ? query.data ?? [] : [];
 
-  const createRDO = async (rdo: Omit<RDO, 'id' | 'createdAt' | 'updatedAt'>): Promise<RDO> => {
-    const result = await rdoRequest<{ rdo: RDO }>({ method: 'POST', body: { action: 'create', id: crypto.randomUUID(), rdo } });
+  const createRDO = async (rdo: Omit<RDO, 'id' | 'createdAt' | 'updatedAt'>, author: { cpf: string; cargo: string }): Promise<RDO> => {
+    const result = await rdoRequest<{ rdo: RDO }>({ method: 'POST', body: { action: 'create', id: crypto.randomUUID(), rdo, author } });
     await client.invalidateQueries({ queryKey });
     return result.rdo;
   };

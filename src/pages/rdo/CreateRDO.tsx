@@ -39,6 +39,8 @@ const rdoSchema = z.object({
   local: z.string().min(1, 'Informe o local'),
   data: z.string().min(1, 'Data é obrigatória'),
   responsavel: z.string().min(1, 'Responsável é obrigatório'),
+  cpfResponsavel: z.string().regex(/^\d{11}$/, 'Informe o CPF com 11 números'),
+  cargoResponsavel: z.string().min(1, 'Informe a função do responsável'),
   clima: z.enum(['sol', 'chuva', 'nublado', 'vento']),
   temperatura: z.number().min(-10).max(50),
   observacoes: z.string().optional(),
@@ -98,6 +100,8 @@ export function CreateRDO() {
       local: '',
       data: new Date().toISOString().split('T')[0],
       responsavel: '',
+      cpfResponsavel: '',
+      cargoResponsavel: '',
       clima: 'sol',
       temperatura: 25,
       observacoes: '',
@@ -268,8 +272,8 @@ export function CreateRDO() {
           cargo: equipe.cargo,
           horasTrabalhadas: calcularHoras(equipe.horaInicio, equipe.horaFim)
         })),
-        equipamentos: (data.equipamentos ?? []).map((eq, index) => ({ ...eq, id: String(index + 1), categoria: 'obra_civil', status: 'em_uso', horasUsadas: calcularHoras(eq.horaInicio, eq.horaFim) })),
-        ocorrencias: (data.ocorrencias ?? []).map((oc, index) => ({ ...oc, id: String(index + 1), categoria: 'seguranca', timestamp: new Date().toISOString(), status_resolucao: 'aberta' })),
+        equipamentos: (data.equipamentos ?? []).map((eq, index) => ({ nome: eq.nome, tipo: eq.tipo, horaInicio: eq.horaInicio, horaFim: eq.horaFim, id: String(index + 1), categoria: 'obra_civil', status: 'em_uso', horasUsadas: calcularHoras(eq.horaInicio, eq.horaFim) })),
+        ocorrencias: (data.ocorrencias ?? []).map((oc, index) => ({ tipo: oc.tipo, descricao: oc.descricao, gravidade: oc.gravidade, responsavel: oc.responsavel, acoes_tomadas: oc.acoes_tomadas, id: String(index + 1), categoria: 'seguranca', timestamp: new Date().toISOString(), status_resolucao: 'aberta' })),
         fotos: await Promise.all(photos.map(async (photo, index) => ({
           id: (index + 1).toString(),
           url: await encodeRDOPhoto(photo),
@@ -278,7 +282,7 @@ export function CreateRDO() {
         })))
       };
 
-      await createRDO(rdoData);
+      await createRDO(rdoData, { cpf: data.cpfResponsavel, cargo: data.cargoResponsavel });
       
       toast({
         title: 'RDO criado com sucesso!',
@@ -333,6 +337,8 @@ export function CreateRDO() {
 
                 <FormField control={form.control} name="cliente" render={({ field }) => <FormItem><FormLabel>Cliente</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                 <FormField control={form.control} name="local" render={({ field }) => <FormItem><FormLabel>Local da obra</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                <FormField control={form.control} name="cpfResponsavel" render={({ field }) => <FormItem><FormLabel>CPF do responsável</FormLabel><FormControl><Input maxLength={11} inputMode="numeric" {...field} /></FormControl><FormMessage /></FormItem>} />
+                <FormField control={form.control} name="cargoResponsavel" render={({ field }) => <FormItem><FormLabel>Função do responsável</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                 <FormField
                   control={form.control}
                   name="data"

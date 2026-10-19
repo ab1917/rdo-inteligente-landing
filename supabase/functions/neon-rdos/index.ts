@@ -51,18 +51,23 @@ Deno.serve(async req => {
     if (input.rdo.status === 'aprovado' && !canApproveRDO((roleRows ?? []).map(r => r.role))) return json({ error: 'Sem permissão para aprovar RDOs.' }, 403);
     const rdo = input.rdo;
     if (input.action === 'create') {
-      // Create the work only when the company has none with this name; work ownership is resolved via protected users.
-      const result = await neonExecute<NeonResult>(`with existing_work as (
-        select o.id from public.obras o join public.users u on u.id = o.responsavel_tecnico_id
-        where u.company_id = $1 and o.nome = $2 limit 1
+      // The legacy author/work foreign keys reference employees, not application users.
+      // Register the verified user's supplied professional details without fabricated CPF data.
+      const result = await neonExecute<NeonResult>(`with author as (
+        insert into public.funcionarios (company_id, nome, cargo, cpf, email)
+        values ($1, $18, $19, $20, $21)
+        on conflict (company_id, email) do update set email = excluded.email returning id
+      ), existing_work as (
+        select o.id from public.obras o join public.funcionarios f on f.id = o.responsavel_tecnico_id
+        where f.company_id = $1 and o.nome = $2 limit 1
       ), new_work as (
         insert into public.obras (nome, cliente, endereco, responsavel_tecnico_id)
-        select $2, $3, $4, $5::uuid where not exists (select 1 from existing_work) returning id
+        select $2, $3, $4, author.id from author where not exists (select 1 from existing_work) returning id
       ), inserted as (
         insert into public.rdos (id, obra_id, data, clima, temperatura, funcionarios_presentes, equipamentos_utilizados, atividades_executadas, materiais_utilizados, fotos, observacoes_gerais, status, criado_por_id)
-        select $6::uuid, id, $7::date, $8, $9::int, $10::jsonb, $11::jsonb, $12::jsonb, $13::jsonb, $14::jsonb, $15, $16, $5::uuid from (select id from existing_work union all select id from new_work) w returning id
+        select $6::uuid, w.id, $7::date, $8, $9::int, $10::jsonb, $11::jsonb, $12::jsonb, $13::jsonb, $14::jsonb, $15, $16, author.id from (select id from existing_work union all select id from new_work) w cross join author returning id
       ) insert into public.rdo_documents (rdo_id, company_id, document) select id, $1::uuid, $17::jsonb from inserted returning rdo_id`,
-      [company, rdo.obra, rdo.cliente, rdo.local, identity.id, input.id, rdo.data, rdo.clima, rdo.temperatura, JSON.stringify(rdo.equipes), JSON.stringify(rdo.equipamentos ?? []), JSON.stringify(rdo.atividades), JSON.stringify(rdo.materiais ?? []), JSON.stringify(rdo.fotos), rdo.observacoes ?? '', rdo.status, JSON.stringify(rdo)]);
+      [company, rdo.obra, rdo.cliente, rdo.local, identity.id, input.id, rdo.data, rdo.clima, rdo.temperatura, JSON.stringify(rdo.equipes), JSON.stringify(rdo.equipamentos ?? []), JSON.stringify(rdo.atividades), JSON.stringify(rdo.materiais ?? []), JSON.stringify(rdo.fotos), rdo.observacoes ?? '', rdo.status, JSON.stringify(rdo), rdo.responsavel, input.author.cargo, input.author.cpf, user.email]);
       if (!result.rows.length) throw new Error('RDO not inserted');
     } else {
       const result = await neonExecute(`with updated as (

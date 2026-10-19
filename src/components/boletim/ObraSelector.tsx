@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Building2, MapPin } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { getStorageData } from '@/services/mockData';
-import { RDO } from '@/types';
+import { useRDO } from '@/hooks/useRDO';
 
 interface ObraSelectorProps {
   selectedObra: string;
@@ -11,29 +10,12 @@ interface ObraSelectorProps {
 }
 
 export const ObraSelector: React.FC<ObraSelectorProps> = ({ selectedObra, onObraChange }) => {
-  const [obras, setObras] = useState<string[]>([]);
-
-  useEffect(() => {
-    // Buscar obras dos RDOs existentes
-    const rdos = getStorageData<RDO[]>('rdos', []);
-    const obrasUnicas = Array.from(new Set(rdos.map(rdo => rdo.obra).filter(Boolean)));
-    
-    // Adicionar obras mock se não houver RDOs
-    if (obrasUnicas.length === 0) {
-      setObras([
-        'Residencial Bella Vista',
-        'Edifício Comercial Centro',
-        'Galpão Industrial Norte',
-        'Condomínio Solar das Águas'
-      ]);
-    } else {
-      setObras(obrasUnicas);
-    }
-  }, []);
+  const { rdos, loading } = useRDO();
+  const obras = Array.from(new Set(rdos.map(rdo => rdo.obra).filter(Boolean)));
 
   return (
     <div className="space-y-4">
-      <Select value={selectedObra} onValueChange={onObraChange}>
+      <Select value={selectedObra} onValueChange={onObraChange} disabled={loading || obras.length === 0}>
         <SelectTrigger>
           <SelectValue placeholder="Selecione uma obra" />
         </SelectTrigger>

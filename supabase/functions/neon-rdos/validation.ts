@@ -26,7 +26,7 @@ export const rdoSchema = z.object({
 });
 
 export const requestSchema = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('create'), id: z.string().uuid(), rdo: rdoSchema }),
+  z.object({ action: z.literal('create'), id: z.string().uuid(), rdo: rdoSchema, author: z.object({ cpf: z.string().regex(/^\d{11}$/), cargo: text.min(1) }) }),
   z.object({ action: z.literal('update'), id: z.string().uuid(), rdo: rdoSchema }),
   z.object({ action: z.literal('delete'), id: z.string().uuid() }),
 ]);
