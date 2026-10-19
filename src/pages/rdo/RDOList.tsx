@@ -44,7 +44,7 @@ const climaIcons = {
 };
 
 export function RDOList() {
-  const { rdos, loading } = useRDO();
+  const { rdos, loading, error, reload } = useRDO();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('todos');
 
@@ -137,8 +137,9 @@ export function RDOList() {
       </Card>
 
       {/* RDO List */}
+      {error && <div role="alert" className="space-y-2 text-destructive"><p>{error}</p><Button variant="outline" onClick={() => reload()}>Tentar novamente</Button></div>}
       <div className="grid gap-4">
-        {filteredRDOs.length === 0 ? (
+        {error ? null : filteredRDOs.length === 0 ? (
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">

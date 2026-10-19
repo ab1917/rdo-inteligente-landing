@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { ContratoIntegrado, BoletimMedicao, RDO, AnaliseFinanceira, ConsolidadoFinanceiro } from '@/types';
+import { ContratoIntegrado, BoletimMedicao, AnaliseFinanceira, ConsolidadoFinanceiro } from '@/types';
 import { getStorageData } from '@/services/mockData';
+import { useRDO } from './useRDO';
 
 export const useFinanceiroIntegrado = () => {
+  const { rdos, loading: rdosLoading } = useRDO();
   const [consolidado, setConsolidado] = useState<ConsolidadoFinanceiro>({
     total_contratos_ativos: 0,
     valor_total_contratos: 0,
@@ -17,15 +19,14 @@ export const useFinanceiroIntegrado = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    calculateConsolidado();
-  }, []);
+    if (!rdosLoading) calculateConsolidado();
+  }, [rdos, rdosLoading]);
 
   const calculateConsolidado = async () => {
     setLoading(true);
     try {
       const contratos = getStorageData<ContratoIntegrado[]>('contratos', []);
       const boletins = getStorageData<BoletimMedicao[]>('boletins', []);
-      const rdos = getStorageData<RDO[]>('rdos', []);
 
       // Calcular análise por contrato
       const analisesPorContrato: AnaliseFinanceira[] = contratos
@@ -165,7 +166,7 @@ export const useFinanceiroIntegrado = () => {
 
   return {
     consolidado,
-    loading,
+    loading: loading || rdosLoading,
     calculateConsolidado,
     getAnaliseContrato,
     getResumoCliente,

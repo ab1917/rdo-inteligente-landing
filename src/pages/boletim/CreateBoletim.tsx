@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
 import { BoletimMedicao, RDO } from '@/types';
-import { getStorageData } from '@/services/mockData';
+import { useRDO } from '@/hooks/useRDO';
 import { ObraSelector } from '@/components/boletim/ObraSelector';
 import { PeriodSelector } from '@/components/boletim/PeriodSelector';
 import { useBoletimMedicao } from '@/hooks/useBoletimMedicao';
@@ -18,6 +18,7 @@ import { useMeasurementSettings } from '@/hooks/useMeasurementSettings';
 const CreateBoletim = () => {
   const navigate = useNavigate();
   const { gerarBoletimConsolidado, loading } = useBoletimMedicao();
+  const { rdos: companyRDOs, loading: rdosLoading, error: rdosError } = useRDO();
   const [selectedObra, setSelectedObra] = useState<string>('');
   const [selectedPeriod, setSelectedPeriod] = useState<{
     inicio: string;
@@ -34,11 +35,11 @@ const CreateBoletim = () => {
       setRdosEncontrados([]);
       return;
     }
-    const rdos = getStorageData<RDO[]>('rdos', []).filter(rdo =>
+    const rdos = companyRDOs.filter(rdo =>
       rdo.obra === selectedObra && rdo.data.slice(0, 10) >= selectedPeriod.inicio && rdo.data.slice(0, 10) <= selectedPeriod.fim
     );
     setRdosEncontrados(rdos);
-  }, [selectedObra, selectedPeriod]);
+  }, [selectedObra, selectedPeriod, companyRDOs]);
 
   useEffect(() => {
     const roles = [...new Set(rdosEncontrados.flatMap(rdo => rdo.equipes.map(e => e.cargo)))];
@@ -83,7 +84,7 @@ const CreateBoletim = () => {
     }
   };
 
-  const canGenerate = selectedObra && selectedPeriod && rdosEncontrados.length > 0;
+  const canGenerate = !rdosLoading && !rdosError && selectedObra && selectedPeriod && rdosEncontrados.length > 0;
 
   if (step === 'generated' && boletimGerado) {
     return (
@@ -174,7 +175,7 @@ const CreateBoletim = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {!selectedObra || !selectedPeriod ? (
+              {rdosError ? <Alert variant="destructive"><AlertDescription>{rdosError}</AlertDescription></Alert> : rdosLoading ? <p role="status">Carregando RDOs...</p> : !selectedObra || !selectedPeriod ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Selecione uma obra e período para visualizar os RDOs</p>

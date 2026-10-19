@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { RDO, Funcionario } from '@/types';
+import { Funcionario } from '@/types';
 import { getStorageData } from '@/services/mockData';
+import { useRDO } from './useRDO';
 
 interface ProductivityMetrics {
   eficiencia_geral: number;
@@ -28,6 +29,7 @@ interface PeriodFilter {
 }
 
 export const useProductivityAnalysis = (filtros?: PeriodFilter) => {
+  const { rdos, loading: rdosLoading } = useRDO();
   const [metrics, setMetrics] = useState<ProductivityMetrics>({
     eficiencia_geral: 0,
     custo_medio_hh: 0,
@@ -42,7 +44,6 @@ export const useProductivityAnalysis = (filtros?: PeriodFilter) => {
     setLoading(true);
     
     try {
-      const rdos = getStorageData<RDO[]>('rdos', []);
       const funcionarios = getStorageData<Funcionario[]>('funcionarios', []);
       
       // Filtrar RDOs baseado nos filtros
@@ -83,8 +84,8 @@ export const useProductivityAnalysis = (filtros?: PeriodFilter) => {
           const funcionario = funcionarios.find(f => f.nome === membro.funcionario);
           const valorHora = funcionario?.valor_hora || 50;
           
-          if (funcionarioStats.has(membro.funcionario)) {
-            const stats = funcionarioStats.get(membro.funcionario)!;
+          const stats = funcionarioStats.get(membro.funcionario);
+          if (stats) {
             stats.horas_trabalhadas += membro.horasTrabalhadas;
             stats.custo_total += membro.horasTrabalhadas * valorHora;
           } else {
@@ -169,12 +170,12 @@ export const useProductivityAnalysis = (filtros?: PeriodFilter) => {
   };
 
   useEffect(() => {
-    calcularMetricas();
-  }, [filtros]);
+    if (!rdosLoading) calcularMetricas();
+  }, [filtros, rdos, rdosLoading]);
 
   return {
     metrics,
-    loading,
+    loading: loading || rdosLoading,
     calcularMetricas,
     gerarRelatorioComparativo,
     exportarRelatorio

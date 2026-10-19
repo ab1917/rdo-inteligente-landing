@@ -1102,9 +1102,6 @@ export const mockDashboardIntegrado: DashboardIntegrado = {
 };
 
 export const initializeData = () => {
-  if (!localStorage.getItem('rdos')) {
-    setStorageData('rdos', mockRDOs);
-  }
   if (!localStorage.getItem('funcionarios')) {
     setStorageData('funcionarios', funcionariosData);
   }

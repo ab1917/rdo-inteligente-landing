@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export function RDODetail() {
   const { id } = useParams();
-  const { getRDOById, loading } = useRDO();
+  const { getRDOById, loading, error, reload } = useRDO();
   const { user } = useAuth();
   const rdo = id ? getRDOById(id) : undefined;
 
@@ -19,6 +19,7 @@ export function RDODetail() {
 
   const back = <Button variant="ghost" className="print:hidden" asChild><Link to="/rdo"><ArrowLeft className="mr-2 h-4 w-4" />Voltar para RDOs</Link></Button>;
 
+  if (error) return <div role="alert" className="space-y-4">{back}<p className="text-destructive">{error}</p><Button onClick={() => reload()}>Tentar novamente</Button></div>;
   if (!rdo) {
     return <div className="space-y-6">{back}<h1 className="text-2xl font-bold">RDO não encontrado</h1><p className="text-muted-foreground">O relatório solicitado não está disponível.</p></div>;
   }
