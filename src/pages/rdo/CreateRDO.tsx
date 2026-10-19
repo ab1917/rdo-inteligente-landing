@@ -586,6 +586,11 @@ export function CreateRDO() {
 
                   <FormField
                     control={form.control}
+                    name={`equipes.${index}.cargo`}
+                    render={({ field }) => <FormItem><FormLabel>Função</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>}
+                  />
+                  <FormField
+                    control={form.control}
                     name={`equipes.${index}.horaInicio`}
                     render={({ field }) => (
                       <FormItem>

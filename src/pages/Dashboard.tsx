@@ -14,15 +14,18 @@ import {
   Eye
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRDO } from '@/hooks/useRDO';
+import { Link } from 'react-router-dom';
+import { StatusBadge } from '@/components/rdo/StatusBadge';
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const { rdos, loading: rdosLoading, error: rdosError } = useRDO();
 
   const stats = [
     {
       title: 'RDOs Hoje',
-      value: '8',
-      change: '+2',
+      value: rdosLoading ? '—' : String(rdos.filter(rdo => rdo.data === new Date().toISOString().slice(0, 10)).length),
       icon: FileText,
       color: 'text-blue-600'
     },
@@ -49,12 +52,7 @@ export const Dashboard = () => {
     }
   ];
 
-  const recentRDOs = [
-    { id: 1, obra: 'Edifício Solar', status: 'Aprovado', data: '2024-01-09' },
-    { id: 2, obra: 'Residencial Verde', status: 'Pendente', data: '2024-01-09' },
-    { id: 3, obra: 'Shopping Center', status: 'Rascunho', data: '2024-01-08' },
-    { id: 4, obra: 'Conjunto Habitacional', status: 'Aprovado', data: '2024-01-08' }
-  ];
+  const recentRDOs = rdos.slice(0, 4);
 
   const obras = [
     { nome: 'Edifício Solar', progresso: 65, prazo: '15 dias', status: 'no-prazo' },
@@ -92,10 +90,10 @@ export const Dashboard = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button>
+          <Button asChild><Link to="/rdo/criar">
             <Plus className="mr-2 h-4 w-4" />
             Novo RDO
-          </Button>
+          </Link></Button>
         </div>
       </div>
 
@@ -111,9 +109,9 @@ export const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">
+              {stat.change && <p className="text-xs text-muted-foreground">
                 <span className="text-green-600">{stat.change}</span> desde ontem
-              </p>
+              </p>}
             </CardContent>
           </Card>
         ))}
@@ -130,6 +128,7 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              {rdosLoading ? <p role="status">Carregando RDOs...</p> : rdosError ? <p role="alert" className="text-destructive">{rdosError}</p> : recentRDOs.length === 0 ? <p className="text-muted-foreground">Nenhum RDO cadastrado.</p> : null}
               {recentRDOs.map((rdo) => (
                 <div key={rdo.id} className="flex items-center justify-between">
                   <div className="flex-1">
@@ -137,12 +136,8 @@ export const Dashboard = () => {
                     <p className="text-xs text-muted-foreground">{rdo.data}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatusBadge(rdo.status)}>
-                      {rdo.status}
-                    </Badge>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                    <StatusBadge status={rdo.status} />
+                    <Button variant="ghost" size="sm" asChild><Link to={`/rdo/${rdo.id}`} aria-label={`Visualizar RDO ${rdo.obra}`}><Eye className="h-4 w-4" /></Link></Button>
                   </div>
                 </div>
               ))}

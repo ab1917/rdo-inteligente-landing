@@ -1,7 +1,8 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { neonQuery, neonExecute, neonUserError, type NeonResult } from '../_shared/neon-gateway.ts';
-import { requestSchema, canWriteRDO, canApproveRDO } from './validation.ts';
+import { requestSchema } from './validation.ts';
+import { canWriteRDO, canApproveRDO } from './permissions.ts';
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 const select = `select d.document, r.id, to_json(r.created_at) as created_iso, to_json(r.updated_at) as updated_iso
@@ -55,7 +56,7 @@ Deno.serve(async req => {
       // Register the verified user's supplied professional details without fabricated CPF data.
       const result = await neonExecute<NeonResult>(`with author as (
         insert into public.funcionarios (company_id, nome, cargo, cpf, email)
-        values ($1, $18, $19, $20, $21)
+        select $1::uuid, $18, $19, $20, $21 from public.users where id = $5::uuid and company_id = $1
         on conflict (company_id, email) do update set email = excluded.email returning id
       ), existing_work as (
         select o.id from public.obras o join public.funcionarios f on f.id = o.responsavel_tecnico_id

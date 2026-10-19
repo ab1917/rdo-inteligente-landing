@@ -30,6 +30,3 @@ export const requestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('update'), id: z.string().uuid(), rdo: rdoSchema }),
   z.object({ action: z.literal('delete'), id: z.string().uuid() }),
 ]);
-
-export const canWriteRDO = (roles: string[]) => roles.some(role => ['admin', 'super_admin', 'manager', 'engineer'].includes(role));
-export const canApproveRDO = (roles: string[]) => roles.some(role => ['admin', 'super_admin', 'manager'].includes(role));
