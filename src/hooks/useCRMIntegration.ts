@@ -1,116 +1,19 @@
-import { useState, useEffect } from 'react';
-import { Cliente, DashboardIntegrado } from '@/types';
-import { getStorageData, mockDashboardIntegrado } from '@/services/mockData';
+import { useMemo } from 'react';
+import { useCommercialData } from './useCommercialData';
 import { useLeads } from './crm/useLeads';
 import { useOportunidades } from './crm/useOportunidades';
 import { useOrcamentos } from './crm/useOrcamentos';
 import { useContratos } from './crm/useContratos';
+import { useBoletimMedicao } from './useBoletimMedicao';
+import { useRDO } from './useRDO';
+import { deriveContractTotals } from '@/services/financeiro/contractTotals';
 import { calculateDashboard } from '@/services/crm/dashboardCalculator';
-import { getRelatedData as getRelatedDataService } from '@/services/crm/relatedDataService';
-
+import { getRelatedData as related } from '@/services/crm/relatedDataService';
 export const useCRMIntegration = () => {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [dashboard, setDashboard] = useState<DashboardIntegrado>(mockDashboardIntegrado);
-  const [loading, setLoading] = useState(true);
-
-  // Use specialized hooks
-  const { leads, loadLeads, createLead, updateLead } = useLeads();
-  const { oportunidades, loadOportunidades, createOportunidade, updateOportunidade, convertLeadToOportunidade } = useOportunidades();
-  const { orcamentos, loadOrcamentos, createOrcamento, updateOrcamento, approveOrcamento } = useOrcamentos();
-  const { contratos, loadContratos, createContrato, updateContrato } = useContratos();
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = () => {
-    setLoading(true);
-    try {
-      loadLeads();
-      setClientes(getStorageData('clientes', []));
-      loadOportunidades();
-      loadOrcamentos();
-      loadContratos();
-      calculateDashboardData();
-    } catch (error) {
-      console.error('Erro ao carregar dados CRM:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const calculateDashboardData = () => {
-    const dashboardData = calculateDashboard(leads, oportunidades, orcamentos, contratos);
-    setDashboard(dashboardData);
-  };
-
-  // Enhanced functions with dashboard recalculation
-  const enhancedCreateLead = (leadData: any) => {
-    const result = createLead(leadData);
-    calculateDashboardData();
-    return result;
-  };
-
-  const enhancedUpdateLead = (id: string, leadData: any) => {
-    updateLead(id, leadData);
-    calculateDashboardData();
-  };
-
-  const enhancedConvertLeadToOportunidade = (leadId: string, oportunidadeData: any) => {
-    const result = convertLeadToOportunidade(leadId, oportunidadeData);
-    // Also update the lead
-    enhancedUpdateLead(leadId, { 
-      convertido_oportunidade: true, 
-      id_oportunidade: result?.id 
-    });
-    return result;
-  };
-
-  const enhancedCreateOrcamento = (orcamentoData: any) => {
-    const result = createOrcamento(orcamentoData);
-    calculateDashboardData();
-    return result;
-  };
-
-  const enhancedApproveOrcamento = (orcamentoId: string) => {
-    approveOrcamento(orcamentoId);
-    calculateDashboardData();
-  };
-
-  const enhancedCreateContrato = (orcamentoId: string, contratoData: any) => {
-    const result = createContrato(orcamentoId, contratoData);
-    // Also update the orcamento
-    updateOrcamento(orcamentoId, { 
-      virou_contrato: true, 
-      id_contrato: result?.id 
-    });
-    calculateDashboardData();
-    return result;
-  };
-
-  const getRelatedData = (entityId: string, entityType: 'lead' | 'oportunidade' | 'orcamento' | 'contrato') => {
-    return getRelatedDataService(entityId, entityType, leads, oportunidades, orcamentos, contratos);
-  };
-
-  return {
-    // Estados
-    leads,
-    clientes,
-    oportunidades,
-    orcamentos,
-    contratos,
-    dashboard,
-    loading,
-    
-    // Funções
-    loadData,
-    createLead: enhancedCreateLead,
-    updateLead: enhancedUpdateLead,
-    convertLeadToOportunidade: enhancedConvertLeadToOportunidade,
-    createOrcamento: enhancedCreateOrcamento,
-    approveOrcamento: enhancedApproveOrcamento,
-    createContrato: enhancedCreateContrato,
-    getRelatedData,
-    calculateDashboard: calculateDashboardData
-  };
+ const data=useCommercialData(), leads=useLeads(), opportunities=useOportunidades(), budgets=useOrcamentos(), contracts=useContratos();
+ const {boletins,loading:bulletinLoading,error:bulletinError}=useBoletimMedicao();const {rdos,loading:rdoLoading,error:rdoError}=useRDO();
+ const contratos=useMemo(()=>deriveContractTotals(data.contratos,boletins,rdos),[data.contratos,boletins,rdos]);
+ const dashboard=useMemo(()=>calculateDashboard(data.leads,data.oportunidades,data.orcamentos,contratos),[data.leads,data.oportunidades,data.orcamentos,contratos]);
+ return {...data,...leads,...opportunities,...budgets,...contracts,contratos,dashboard,loading:data.loading||bulletinLoading||rdoLoading,error:data.error||bulletinError||rdoError,
+ loadData:data.reload,calculateDashboard:()=>dashboard,getRelatedData:(id:string,type:'lead'|'oportunidade'|'orcamento'|'contrato')=>related(id,type,data.leads,data.oportunidades,data.orcamentos,contratos)};
 };

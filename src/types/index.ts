@@ -314,6 +314,11 @@ export interface Activity {
 
 // Boletim de Medição
 export interface BoletimMedicao {
+  tipo_medicao?: 'hh' | 'escopo_fechado';
+  id_contrato?: string;
+  descricao_entrega?: string;
+  faturado_em?: string;
+  medicao_escopo?: ReturnType<typeof import('@/services/scopeMeasurement').calculateScopeMeasurement>;
   id: string;
   rdo_id: string; // IDs dos RDOs (separados por vírgula se consolidado)
   obra_nome?: string; // Nome da obra

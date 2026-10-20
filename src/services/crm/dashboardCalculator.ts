@@ -54,7 +54,7 @@ export const calculateDashboard = (
     desvio_orcamentario_medio: contratos.length > 0
       ? contratos.reduce((sum, c) => {
           const orcamento = orcamentos.find(o => o.id === c.id_orcamento);
-          if (!orcamento) return sum;
+          if (!orcamento || c.percentual_execucao <= 0 || orcamento.valor_total <= 0) return sum;
           const desvio = ((c.custo_executado_total - (orcamento.valor_total * (c.percentual_execucao / 100))) / 
                         (orcamento.valor_total * (c.percentual_execucao / 100))) * 100;
           return sum + desvio;
@@ -64,8 +64,8 @@ export const calculateDashboard = (
     valor_a_faturar: contratos.reduce((sum, c) => sum + c.valor_pendente_faturamento, 0),
 
     // Indicadores de performance
-    prazo_medio_aprovacao_orcamento: 8,
-    tempo_medio_ciclo_comercial: oportunidades.length > 0
+    prazo_medio_aprovacao_orcamento: 0,
+    tempo_medio_ciclo_comercial: oportunidades.some(o => o.status === 'aprovada')
       ? oportunidades
           .filter(o => o.status === 'aprovada')
           .reduce((sum, o) => {

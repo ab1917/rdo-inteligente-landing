@@ -1114,19 +1114,4 @@ export const initializeData = () => {
   if (!localStorage.getItem('obras')) {
     setStorageData('obras', mockObras);
   }
-  if (!localStorage.getItem('clientes')) {
-    setStorageData('clientes', mockClientes);
-  }
-  if (!localStorage.getItem('leads')) {
-    setStorageData('leads', mockLeads);
-  }
-  if (!localStorage.getItem('oportunidades')) {
-    setStorageData('oportunidades', mockOportunidades);
-  }
-  if (!localStorage.getItem('orcamentos')) {
-    setStorageData('orcamentos', mockOrcamentos);
-  }
-  if (!localStorage.getItem('contratos')) {
-    setStorageData('contratos', mockContratos);
-  }
 };

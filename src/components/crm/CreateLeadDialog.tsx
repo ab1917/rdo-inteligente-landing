@@ -82,7 +82,7 @@ const CreateLeadDialog = () => {
         id_oportunidade: undefined
       };
 
-      createLead(leadData);
+      await createLead(leadData);
       
       toast({
         title: "Lead criado com sucesso!",
@@ -357,7 +357,7 @@ const CreateLeadDialog = () => {
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
                 Criar Lead
               </Button>
             </div>
