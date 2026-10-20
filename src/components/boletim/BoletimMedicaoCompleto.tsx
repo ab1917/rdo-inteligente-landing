@@ -1,4 +1,5 @@
 import React from 'react';
+import { ScopeMeasurementDocument } from './ScopeMeasurementDocument';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,8 @@ export function BoletimMedicaoCompleto({ boletim, onAprovar, readOnly = false }:
     
     return <Badge variant={variants[status]}>{status.toUpperCase()}</Badge>;
   };
+
+  if (boletim.tipo_medicao === 'escopo_fechado') return <ScopeMeasurementDocument boletim={boletim}/>;
 
   return (
     <div className="space-y-6">

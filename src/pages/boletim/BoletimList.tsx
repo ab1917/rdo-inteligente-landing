@@ -5,23 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { BoletimMedicao } from '@/types';
-import { getStorageData } from '@/services/mockData';
+import { useBoletimMedicao } from '@/hooks/useBoletimMedicao';
+import { Alert,AlertDescription } from '@/components/ui/alert';
 import { BoletimFilters } from '@/components/boletim/BoletimFilters';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const BoletimList = () => {
   const navigate = useNavigate();
-  const [boletins, setBoletins] = useState<BoletimMedicao[]>([]);
-  const [filteredBoletins, setFilteredBoletins] = useState<BoletimMedicao[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const boletinsData = getStorageData<BoletimMedicao[]>('boletins_medicao', []);
-    setBoletins(boletinsData);
-    setFilteredBoletins(boletinsData);
-    setLoading(false);
-  }, []);
+  const { boletins, loading, error } = useBoletimMedicao();
+  const [filteredBoletins,setFilteredBoletins]=useState<BoletimMedicao[]>([]);
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -78,6 +71,7 @@ const BoletimList = () => {
         </Button>
       </div>
 
+      {error&&<Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -154,7 +148,7 @@ const BoletimList = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      Boletim #{boletim.id}
+                      {boletim.obra_nome || 'Boletim'}
                       {getStatusBadge(boletim.status)}
                     </CardTitle>
                     <CardDescription className="flex items-center gap-4 mt-2">
@@ -164,7 +158,7 @@ const BoletimList = () => {
                       </span>
                       <span className="flex items-center gap-1">
                         <FileText className="h-4 w-4" />
-                        RDO: {boletim.rdo_id}
+                        {boletim.tipo_medicao==='escopo_fechado'?'Escopo fechado':`RDO: ${boletim.rdo_id}`}
                       </span>
                     </CardDescription>
                   </div>
@@ -182,7 +176,7 @@ const BoletimList = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                {boletim.medicao_escopo?<div className="flex flex-wrap gap-6 text-sm"><span>Período: {boletim.medicao_escopo.percentual_periodo}%</span><span>Acumulado: {boletim.medicao_escopo.percentual_acumulado}%</span></div>:<div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Funcionários:</span>
                     <div className="font-medium">
@@ -210,7 +204,8 @@ const BoletimList = () => {
                       }).format(boletim.resumo_financeiro?.total_materiais || 0)}
                     </div>
                   </div>
-                </div>
+                </div>}
+                <Button variant="outline" className="mt-4" onClick={()=>navigate(`/boletim/${boletim.id}`)}>Abrir medição</Button>
               </CardContent>
             </Card>
           ))

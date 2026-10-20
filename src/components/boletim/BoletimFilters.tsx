@@ -31,7 +31,7 @@ export const BoletimFilters: React.FC<BoletimFiltersProps> = ({ boletins, onFilt
   const applyFilters = () => {
     let filtered = [...boletins];
 
-    if (filters.status) {
+    if (filters.status && filters.status !== 'all') {
       filtered = filtered.filter(b => b.status === filters.status);
     }
 
@@ -107,7 +107,7 @@ export const BoletimFilters: React.FC<BoletimFiltersProps> = ({ boletins, onFilt
                     <SelectValue placeholder="Todos os status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="rascunho">Rascunho</SelectItem>
                     <SelectItem value="aprovado">Aprovado</SelectItem>
                     <SelectItem value="faturado">Faturado</SelectItem>
