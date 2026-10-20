@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { ContratoIntegrado, BoletimMedicao, AnaliseFinanceira, ConsolidadoFinanceiro } from '@/types';
-import { getStorageData } from '@/services/mockData';
+import { useCommercialData } from './useCommercialData';
+import { useBoletimMedicao } from './useBoletimMedicao';
+import { deriveContractTotals } from '@/services/financeiro/contractTotals';
 import { useRDO } from './useRDO';
 
 export const useFinanceiroIntegrado = () => {
-  const { rdos, loading: rdosLoading } = useRDO();
+  const { rdos, loading: rdosLoading, error: rdoError } = useRDO();
+  const commercial = useCommercialData();
+  const { boletins, loading: boletinsLoading, error: boletinsError } = useBoletimMedicao();
   const [consolidado, setConsolidado] = useState<ConsolidadoFinanceiro>({
     total_contratos_ativos: 0,
     valor_total_contratos: 0,
@@ -19,36 +23,20 @@ export const useFinanceiroIntegrado = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!rdosLoading) calculateConsolidado();
-  }, [rdos, rdosLoading]);
+    if (!rdosLoading && !commercial.loading && !boletinsLoading) calculateConsolidado();
+  }, [rdos, rdosLoading, commercial.contratos, commercial.orcamentos, commercial.loading, boletins, boletinsLoading]);
 
   const calculateConsolidado = async () => {
     setLoading(true);
     try {
-      const contratos = getStorageData<ContratoIntegrado[]>('contratos', []);
-      const boletins = getStorageData<BoletimMedicao[]>('boletins', []);
+      const contratos = deriveContractTotals(commercial.contratos, boletins, rdos);
 
       // Calcular análise por contrato
       const analisesPorContrato: AnaliseFinanceira[] = contratos
         .filter(c => c.status === 'ativo')
         .map(contrato => {
           // Buscar boletins relacionados ao contrato
-          const boletinsContrato = boletins.filter(b => {
-            // Buscar RDOs que pertencem a este contrato
-            const rdosBoletim = b.rdo_id.split(',').map(id => id.trim());
-            return rdosBoletim.some(rdoId => {
-              const rdo = rdos.find(r => r.id === rdoId);
-              return rdo && rdo.obra === contrato.nome_projeto;
-            });
-          });
-
-          // Calcular custos reais dos boletins
-          const custoRealBoletins = boletinsContrato.reduce((total, boletim) => 
-            total + boletim.resumo_financeiro.total_geral, 0
-          );
-
-          // Usar custo do contrato ou dos boletins (o que for maior)
-          const custoExecutado = Math.max(contrato.custo_executado_total, custoRealBoletins);
+          const custoExecutado = contrato.custo_executado_total;
           
           // Calcular margem atual
           const margemAtual = contrato.valor_fechado > 0 
@@ -56,7 +44,7 @@ export const useFinanceiroIntegrado = () => {
             : 0;
 
           // Calcular desvio de margem
-          const orcamentos = getStorageData('orcamentos', []);
+          const orcamentos = commercial.orcamentos;
           const orcamento = orcamentos.find((o: any) => o.id === contrato.id_orcamento);
           const margemPrevista = orcamento?.margem_lucro_prevista || 0;
           const desvioMargem = margemAtual - margemPrevista;
@@ -166,7 +154,8 @@ export const useFinanceiroIntegrado = () => {
 
   return {
     consolidado,
-    loading: loading || rdosLoading,
+    loading: loading || rdosLoading || commercial.loading || boletinsLoading,
+    error: commercial.error || boletinsError || rdoError,
     calculateConsolidado,
     getAnaliseContrato,
     getResumoCliente,

@@ -47,7 +47,7 @@ interface CreateOportunidadeDialogProps {
 
 const CreateOportunidadeDialog = ({ leadId, leadData }: CreateOportunidadeDialogProps) => {
   const [open, setOpen] = useState(false);
-  const { createOrcamento, convertLeadToOportunidade } = useCRMIntegration();
+  const { createOportunidade, convertLeadToOportunidade } = useCRMIntegration();
   const { toast } = useToast();
 
   const form = useForm<OportunidadeFormData>({
@@ -80,8 +80,9 @@ const CreateOportunidadeDialog = ({ leadId, leadData }: CreateOportunidadeDialog
   const onSubmit = async (data: OportunidadeFormData) => {
     try {
       const oportunidadeData = {
-        id_cliente: leadData ? leadId || "cliente-temp" : "cliente-temp",
-        nome_cliente: leadData?.nome_cliente || "Cliente",
+        id_cliente: "",
+        nome_projeto: data.nome_projeto,
+        nome_cliente: leadData?.nome_cliente || data.empresa_cliente,
         empresa_cliente: data.empresa_cliente,
         tipo_servico: (leadData?.interesse_servico as "obra_civil" | "manutencao_industrial" | "consultoria") || "obra_civil",
         valor_estimado: parseFloat(data.valor_estimado.replace(/[^\d,]/g, '').replace(',', '.')),
@@ -100,16 +101,9 @@ const CreateOportunidadeDialog = ({ leadId, leadData }: CreateOportunidadeDialog
       let oportunidade;
       if (leadId) {
         // Convertendo lead em oportunidade
-        oportunidade = convertLeadToOportunidade(leadId, oportunidadeData);
+        oportunidade = await convertLeadToOportunidade(leadId, oportunidadeData);
       } else {
-        // Criar oportunidade direta (sem lead)
-        // Aqui precisaríamos de uma função createOportunidade no hook
-        toast({
-          title: "Funcionalidade em desenvolvimento",
-          description: "Por enquanto, só é possível converter leads em oportunidades.",
-          variant: "destructive"
-        });
-        return;
+        oportunidade = await createOportunidade({ ...oportunidadeData, id_lead: '' });
       }
 
       if (oportunidade) {
@@ -429,7 +423,7 @@ const CreateOportunidadeDialog = ({ leadId, leadData }: CreateOportunidadeDialog
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
                 {leadId ? "Converter Lead" : "Criar Oportunidade"}
               </Button>
             </div>

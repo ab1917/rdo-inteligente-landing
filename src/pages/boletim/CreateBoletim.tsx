@@ -13,11 +13,18 @@ import { BoletimMedicaoCompleto } from '@/components/boletim/BoletimMedicaoCompl
 import { toast } from '@/hooks/use-toast';
 import { MeasurementSettings } from '@/components/boletim/MeasurementSettings';
 import { normalizeRole } from '@/services/measurementConfig';
+import { ScopeMeasurement } from '@/components/boletim/ScopeMeasurement';
+import { Tabs,TabsList,TabsTrigger } from '@/components/ui/tabs';
+import { useCommercialData } from '@/hooks/useCommercialData';
+import { Select,SelectTrigger,SelectValue,SelectContent,SelectItem } from '@/components/ui/select';
 import { useMeasurementSettings } from '@/hooks/useMeasurementSettings';
 
 const CreateBoletim = () => {
   const navigate = useNavigate();
   const { gerarBoletimConsolidado, loading } = useBoletimMedicao();
+  const [mode,setMode]=useState('hh');
+  const [contractId,setContractId]=useState('none');
+  const {contratos}=useCommercialData();
   const { rdos: companyRDOs, loading: rdosLoading, error: rdosError } = useRDO();
   const [selectedObra, setSelectedObra] = useState<string>('');
   const [selectedPeriod, setSelectedPeriod] = useState<{
@@ -65,7 +72,8 @@ const CreateBoletim = () => {
         selectedObra,
         selectedPeriod.inicio,
         selectedPeriod.fim,
-        measurementConfig
+        measurementConfig,
+        contractId==='none'?undefined:contractId
       );
       
       setBoletimGerado(boletim);
@@ -122,6 +130,8 @@ const CreateBoletim = () => {
         </div>
       </div>
 
+      <Tabs value={mode} onValueChange={setMode}><TabsList><TabsTrigger value="hh">Por HH / RDO</TabsTrigger><TabsTrigger value="scope">Escopo fechado — avanço %</TabsTrigger></TabsList></Tabs>
+      {mode==='scope'?<ScopeMeasurement onGenerated={b=>{setBoletimGerado(b);setStep('generated');}}/>:< >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Configuração */}
         <div className="space-y-6">
@@ -225,6 +235,7 @@ const CreateBoletim = () => {
         </div>
       </div>
 
+      <div className="space-y-2"><p className="font-medium">Contrato por HH</p><Select value={contractId} onValueChange={setContractId}><SelectTrigger aria-label="Contrato por HH"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="none">Sem vínculo contratual</SelectItem>{contratos.filter(c=>c.nome_projeto===selectedObra&&c.tipo_execucao!=='escopo'&&c.status==='ativo').map(c=><SelectItem key={c.id} value={c.id}>{c.nome_projeto}</SelectItem>)}</SelectContent></Select></div>
       <MeasurementSettings value={measurementConfig} onChange={setMeasurementConfig} />
       <div className="flex items-center gap-4">
         <Button
@@ -241,6 +252,7 @@ const CreateBoletim = () => {
         {settingsLoading && <span className="text-sm text-muted-foreground">Carregando configuração salva...</span>}
         {!settingsLoading && settingsError && <span className="text-sm text-muted-foreground">{settingsError}</span>}
       </div>
+      </>}
     </div>
   );
 };

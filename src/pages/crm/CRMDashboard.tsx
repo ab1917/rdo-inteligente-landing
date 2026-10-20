@@ -10,13 +10,14 @@ import { FinancialIndicators } from "@/components/crm/dashboard/FinancialIndicat
 import { QuickActions } from "@/components/crm/dashboard/QuickActions";
 
 const CRMDashboard = () => {
-  const { dashboard, oportunidades, contratos, loading } = useCRMIntegration();
+  const { dashboard, oportunidades, contratos, loading, error } = useCRMIntegration();
   const { consolidado, getIndicadoresGlobais } = useFinanceiroIntegrado();
 
   if (loading) {
     return <div className="flex items-center justify-center h-96">Carregando dados integrados...</div>;
   }
 
+  if(error) return <p role="alert" className="text-destructive">{error}</p>;
   const indicadores = getIndicadoresGlobais();
 
   return (

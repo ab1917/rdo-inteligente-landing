@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BoletimMedicao } from '@/types';
-import { getStorageData } from '@/services/mockData';
+import { useAuth } from '@/hooks/useAuth';
+import { Alert,AlertDescription } from '@/components/ui/alert';
 import { BoletimMedicaoCompleto } from '@/components/boletim/BoletimMedicaoCompleto';
 import { useBoletimMedicao } from '@/hooks/useBoletimMedicao';
 import { toast } from '@/hooks/use-toast';
@@ -13,30 +14,16 @@ import { toast } from '@/hooks/use-toast';
 const BoletimDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { aprovarBoletim, loading } = useBoletimMedicao();
-  const [boletim, setBoletim] = useState<BoletimMedicao | null>(null);
-
-  useEffect(() => {
-    if (id) {
-      const boletins = getStorageData<BoletimMedicao[]>('boletins_medicao', []);
-      const boletimEncontrado = boletins.find(b => b.id === id);
-      setBoletim(boletimEncontrado || null);
-    }
-  }, [id]);
+  const { aprovarBoletim, faturarBoletim, boletins, loading, error } = useBoletimMedicao();
+  const {user}=useAuth();
+  const allowed=user&&['admin','manager','super_admin'].includes(user.role);
+  const boletim=boletins.find(b=>b.id===id);
 
   const handleAprovar = async () => {
     if (!boletim) return;
     
     try {
       await aprovarBoletim(boletim.id, 'Sistema');
-      
-      // Atualizar o boletim local
-      setBoletim(prev => prev ? {
-        ...prev,
-        status: 'aprovado',
-        aprovado_em: new Date().toISOString(),
-        aprovado_por: 'Sistema'
-      } : null);
       
       toast({
         title: "Boletim aprovado!",
@@ -72,6 +59,8 @@ const BoletimDetail = () => {
     );
   };
 
+  if (loading) return <p role="status">Carregando medição...</p>;
+  if(error) return <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>;
   if (!boletim) {
     return (
       <div className="p-6 space-y-6">
@@ -98,7 +87,7 @@ const BoletimDetail = () => {
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">Boletim #{boletim.id}</h1>
+              <h1 className="text-2xl font-bold">{boletim.obra_nome || 'Boletim de Medição'}</h1>
               {getStatusBadge(boletim.status)}
             </div>
             <p className="text-muted-foreground">
@@ -109,7 +98,7 @@ const BoletimDetail = () => {
         </div>
 
         <div className="flex gap-2 print:hidden">
-          {boletim.status === 'rascunho' && (
+          {allowed && boletim.status === 'rascunho' && (
             <Button 
               onClick={handleAprovar}
               disabled={loading}
@@ -125,12 +114,8 @@ const BoletimDetail = () => {
             Imprimir / PDF
           </Button>
           
-          {boletim.status === 'rascunho' && (
-            <Button variant="outline" className="gap-2">
-              <Edit3 className="h-4 w-4" />
-              Editar
-            </Button>
-          )}
+          {allowed&&boletim.status==='aprovado'&&<Button onClick={async()=>{try{await faturarBoletim(boletim.id);toast({title:'Faturamento registrado'});}catch(e){toast({title:'Erro ao faturar',description:e instanceof Error?e.message:'Tente novamente.',variant:'destructive'});}}}>Registrar faturamento</Button>}
+
         </div>
       </div>
 

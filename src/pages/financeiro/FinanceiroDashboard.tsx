@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, AlertTriangle, Users } from 'lucide-react';
 
 export function FinanceiroDashboard() {
-  const { consolidado, loading, getIndicadoresGlobais } = useFinanceiroIntegrado();
+  const { consolidado, loading, error, getIndicadoresGlobais } = useFinanceiroIntegrado();
   const [filtros, setFiltros] = useState({
     periodo: 'todos',
     cliente: 'todos',
@@ -52,6 +52,7 @@ export function FinanceiroDashboard() {
     );
   }
 
+  if(error) return <p role="alert" className="text-destructive">{error}</p>;
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
